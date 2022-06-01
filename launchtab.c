@@ -1,9 +1,14 @@
 #include <fcntl.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+#define YY_HEADER_EXPORT_START_CONDITIONS
+#include "launchtab.h"
+#include "tab.yy.h"
 
 #define DEFAULT_EDITOR "nano"
 #define CONFIG ".config/"
@@ -30,7 +35,7 @@ void make_dirs(const char *home)
 	free(path);
 }
 
-int edit_file(const char *file)
+FILE *edit_file(const char *file)
 {
 	char *editor = getenv("EDITOR");
 	struct timespec oldtime = {0};
@@ -57,15 +62,15 @@ int edit_file(const char *file)
 
 	if (oldtime.tv_sec == newtime.tv_sec
 			&& oldtime.tv_nsec == newtime.tv_nsec) {
-		return -1; /* tab file was not modified */
+		return NULL; /* tab file was not modified */
 	}
 
-	return open(file, O_RDONLY);
+	return fopen(file, "r");
 }
 
 int main(void)
 {
-	int fd;
+	FILE *fd;
 	char *home = getenv("HOME");
 	char *tabpath;
 
@@ -78,11 +83,16 @@ int main(void)
 
 	make_dirs(home);
 	fd = edit_file(tabpath);
-	if (fd < 0)
+	if (!fd) {
+		fprintf(stderr, "launchtab: no changes made to "TAB"\n");
 		return 0;
+	}
 
-	close(fd);
+	yyin = fd;
+	lex_init();
+	yylex();
+
+	fclose(fd);
 	free(tabpath);
-	write(1, "file was modified\n", 18);
 	return 0;
 }

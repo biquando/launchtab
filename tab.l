@@ -1,12 +1,14 @@
 %{
 #include <stdio.h>
+#include "launchtab.h"
 %}
 
 id             ^{space}?\[.+\]$
 comment        ^{space}?#.*$
+commandMulti   ^{space}?.*\\$
 command        ^{space}?.*$
 interval       ^{space}?Interval{space}[0-9]+$
-calendar       ^{space}?((\*|([0-9]+)){space}){0,4}(\*|([0-9]+))$
+calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}$
 envar          ^{space}?[a-zA-Z0-9_]+=.*$
 stdin          ^{space}?\<.+$
 stdout         ^{space}?\>.+$
@@ -15,7 +17,9 @@ verbatimStart  ^{space}?---$
 verbatimEnd    ^{space}?---$
 verbatimLine   ^{space}?.*$
 unknownOpt     ^{space}?.*$
+
 space [ \t]+
+calEntry (\*|([0-9]+))
 
 %s COMSC
 %s OPTSC
@@ -25,6 +29,7 @@ space [ \t]+
 
 <OPTSC>{id} {printf("id: %s", yytext); BEGIN COMSC;}
 {comment} {printf("comment: %s", yytext);}
+<COMSC>{commandMulti} {printf("commandMulti: %s", yytext);}
 <COMSC>{command} {printf("command: %s", yytext); BEGIN OPTSC;}
 
 <OPTSC>{interval} {printf("interval: %s", yytext);}
@@ -44,4 +49,9 @@ space [ \t]+
 int yywrap(void)
 {
 	return 1;
+}
+
+void lex_init(void)
+{
+	BEGIN OPTSC;
 }
