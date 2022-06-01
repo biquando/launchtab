@@ -1,0 +1,14 @@
+[com.biqua.airbackup.daily]
+"$HOME/bin/airbackup" udorm:~ $(date +%-a) "$LOG" $(date -jf %T 00:00:00 +%-s)
+Interval 3611
+* 5
+* 4 * * 1
+HOME=/Users/biqua
+LOG=/Users/biqua/.airbackup.daily
+</some/input/file
+>/dev/null
+2>/dev/null
+---
+<key>LimitLoadToSessionType</key>
+<string>Aqua</string>
+---
