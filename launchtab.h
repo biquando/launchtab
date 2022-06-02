@@ -1,6 +1,13 @@
 #ifndef _LAUNCHTAB_LAUNCHTAB_H
 #define _LAUNCHTAB_LAUNCHTAB_H
 
+#define DEFAULT_EDITOR "nano"
+#define CONFIG ".config/"
+#define TABDIR "launchtab/"
+#define TAB    "launch.tab"
+#define TABPATH CONFIG TABDIR TAB
+#define LAUNCHPATH "Library/LaunchAgents"
+
 void lex_init(void);
 
 void *try_malloc(size_t size);

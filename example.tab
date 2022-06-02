@@ -1,21 +1,22 @@
-[com.biqua.airbackup.daily]
-# hello world
-"$HOME/bin/airbackup"         \
-	udorm:~ $(date +%-a)  \
-	"$LOG"                \
-	$(date -jf %T 00:00:00 +%-s)
+[com.example.task]
+echo "It is $(date)!" >>"$FILE"
 
-Interval 3611
-0   5
-*   4   *	* 1
+# run every hour
+Interval 3600
 
-HOME=/Users/biqua
-LOG=/Users/biqua/.airbackup.daily
-<   /some/input/file
-#>/dev/null
-2>/dev/null
+# run at 5:30 on mondays
+30 5 * * 1
 
+# set environment variables
+FILE=/tmp/launchtab-example
+
+# redirect stdin, stdout, and stderr
+<  /etc/passwd
+>  /dev/null
+2> /dev/null
+
+# additional keys
 ---
-<key>LimitLoadToSessionType</key>
-<string>Aqua</string>
+<key>RunAtLoad</key>
+<true/>
 ---
