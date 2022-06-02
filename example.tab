@@ -1,5 +1,9 @@
 [com.biqua.airbackup.daily]
-"$HOME/bin/airbackup" udorm:~ $(date +%-a) "$LOG" $(date -jf %T 00:00:00 +%-s)
+#hello world
+"$HOME/bin/airbackup"         \
+	udorm:~ $(date +%-a)  \
+	"$LOG"                \
+	$(date -jf %T 00:00:00 +%-s)
 Interval 3611
 * 5
 * 4 * * 1

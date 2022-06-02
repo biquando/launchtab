@@ -1,22 +1,22 @@
 %{
-#include <stdio.h>
 #include "launchtab.h"
 %}
 
-id             ^{space}?\[.+\]$
-comment        ^{space}?#.*$
-commandMulti   ^{space}?.*\\$
-command        ^{space}?.*$
-interval       ^{space}?Interval{space}[0-9]+$
-calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}$
-envar          ^{space}?[a-zA-Z0-9_]+=.*$
-stdin          ^{space}?\<.+$
-stdout         ^{space}?\>.+$
-stderr         ^{space}?2\>.+$
-verbatimStart  ^{space}?---$
-verbatimEnd    ^{space}?---$
-verbatimLine   ^{space}?.*$
-unknownOpt     ^{space}?.*$
+id             ^{space}?\[.+\]\n
+comment        ^{space}?#.*\n
+emptyLine      ^{space}?\n
+commandMulti   ^{space}?.*\\\n
+command        ^{space}?.*\n
+interval       ^{space}?Interval{space}[0-9]+\n
+calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}\n
+envar          ^{space}?[a-zA-Z0-9_]+=.*\n
+stdin          ^{space}?\<.+\n
+stdout         ^{space}?\>.+\n
+stderr         ^{space}?2\>.+\n
+verbatimStart  ^{space}?---\n
+verbatimEnd    ^{space}?---\n
+verbatimLine   ^{space}?.*\n
+unknownOpt     ^{space}?.*\n
 
 space [ \t]+
 calEntry (\*|([0-9]+))
@@ -27,22 +27,25 @@ calEntry (\*|([0-9]+))
 
 %%
 
-<OPTSC>{id} {printf("id: %s", yytext); BEGIN COMSC;}
-{comment} {printf("comment: %s", yytext);}
-<COMSC>{commandMulti} {printf("commandMulti: %s", yytext);}
-<COMSC>{command} {printf("command: %s", yytext); BEGIN OPTSC;}
+<OPTSC>{id}            {handle_id();             BEGIN COMSC;}
+{comment}              {handle_comment();                    }
+{emptyLine}            {handle_emptyLine();                  }
+<COMSC>{commandMulti}  {handle_commandMulti();               }
+<COMSC>{command}       {handle_command();        BEGIN OPTSC;}
 
-<OPTSC>{interval} {printf("interval: %s", yytext);}
-<OPTSC>{calendar} {printf("calendar: %s", yytext);}
-<OPTSC>{envar} {printf("envar: %s", yytext);}
-<OPTSC>{stdin} {printf("stdin: %s", yytext);}
-<OPTSC>{stdout} {printf("stdout: %s", yytext);}
-<OPTSC>{stderr} {printf("stderr: %s", yytext);}
+<OPTSC>{interval}      {handle_interval();                   }
+<OPTSC>{calendar}      {handle_calendar();                   }
+<OPTSC>{envar}         {handle_envar();                      }
+<OPTSC>{stdin}         {handle_stdin();                      }
+<OPTSC>{stdout}        {handle_stdout();                     }
+<OPTSC>{stderr}        {handle_stderr();                     }
 
-<OPTSC>{verbatimStart} {printf("verbatimStart: %s", yytext); BEGIN VERSC;}
-<VERSC>{verbatimEnd} {printf("verbatimEnd: %s", yytext); BEGIN OPTSC;}
-<VERSC>{verbatimLine} {printf("verbatimLine: %s", yytext);}
-<OPTSC>{unknownOpt} {printf("unknownOpt: %s", yytext);}
+<OPTSC>{verbatimStart} {handle_verbatimStart();  BEGIN VERSC;}
+<VERSC>{verbatimEnd}   {handle_verbatimEnd();    BEGIN OPTSC;}
+<VERSC>{verbatimLine}  {handle_verbatimLine();               }
+<OPTSC>{unknownOpt}    {handle_unknownOpt();                 }
+
+<*>.|\n {}
 
 %%
 
@@ -54,4 +57,81 @@ int yywrap(void)
 void lex_init(void)
 {
 	BEGIN OPTSC;
+}
+
+void handle_id(void)
+{
+	printf("id: %s", yytext);
+}
+
+void handle_comment(void)
+{
+	printf("comment: %s", yytext);
+}
+
+void handle_emptyLine(void)
+{
+	printf("emptyLine: %s", yytext);
+}
+
+void handle_commandMulti(void)
+{
+	printf("commandMulti: %s", yytext);
+}
+
+void handle_command(void)
+{
+	printf("command: %s", yytext);
+}
+
+
+void handle_interval(void)
+{
+	printf("interval: %s", yytext);
+}
+
+void handle_calendar(void)
+{
+	printf("calendar: %s", yytext);
+}
+
+void handle_envar(void)
+{
+	printf("envar: %s", yytext);
+}
+
+void handle_stdin(void)
+{
+	printf("stdin: %s", yytext);
+}
+
+void handle_stdout(void)
+{
+	printf("stdout: %s", yytext);
+}
+
+void handle_stderr(void)
+{
+	printf("stderr: %s", yytext);
+}
+
+
+void handle_verbatimStart(void)
+{
+	printf("verbatimStart: %s", yytext);
+}
+
+void handle_verbatimEnd(void)
+{
+	printf("verbatimEnd: %s", yytext);
+}
+
+void handle_verbatimLine(void)
+{
+	printf("verbatimLine: %s", yytext);
+}
+
+void handle_unknownOpt(void)
+{
+	printf("unknownOpt: %s", yytext);
 }

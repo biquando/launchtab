@@ -10,11 +10,11 @@ OBJ = $(SRC:.c=.o)
 
 .PHONY: all clean
 
-all: launchtab
+all: bin/launchtab
 
-launchtab: tab.yy.o $(OBJ)
+bin/launchtab: tab.yy.o $(OBJ)
 	mkdir -p bin
-	$(LD) -o bin/$@ $(LDFLAGS) $^
+	$(LD) -o $@ $(LDFLAGS) $^
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c $<
