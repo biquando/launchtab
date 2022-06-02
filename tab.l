@@ -24,12 +24,14 @@ unknownOpt     ^{space}?.*\n
 space [ \t]+
 calEntry (\*|([0-9]+))
 
+%s INISC
 %s COMSC
 %s OPTSC
 %x VERSC
 
 %%
 
+<INISC>{id}            {handle_id();             BEGIN COMSC;}
 <OPTSC>{id}            {handle_id();             BEGIN COMSC;}
 {comment}              {handle_comment();                    }
 {emptyLine}            {handle_emptyLine();                  }
@@ -48,7 +50,7 @@ calEntry (\*|([0-9]+))
 <VERSC>{verbatimLine}  {handle_verbatimLine();               }
 <OPTSC>{unknownOpt}    {handle_unknownOpt();                 }
 
-<*>.|\n {}
+<*>.|\n                {handle_invalid();      yyterminate();}
 
 %%
 
@@ -59,7 +61,7 @@ int yywrap(void)
 
 void lex_init(void)
 {
-	BEGIN OPTSC;
+	BEGIN INISC;
 }
 
 
@@ -100,13 +102,14 @@ static void *try_realloc(void *ptr, size_t size)
 void handle_id(void)
 {
 	printf("id: %s", yytext);
+	yytext = trim(yytext);
+
 	nrules++;
 	rules = try_realloc(rules, nrules * sizeof *rules);
 
 	struct rule *r = &rules[nrules - 1];
 	memset(r, 0, sizeof *r);
 
-	yytext = trim(yytext);
 	int len = strlen(yytext);
 	yytext[len - 1] = '\0'; /* remove trailing ] */
 	r->id = try_malloc(len);
@@ -150,14 +153,41 @@ void handle_command(void)
 }
 
 
+/* Options */
+
 void handle_interval(void)
 {
 	printf("interval: %s", yytext);
+	yytext = trim(yytext);
+	yytext += sizeof("Interval");
+	yytext = trim(yytext);
+
+	struct rule *r = &rules[nrules - 1];
+	r->interval = try_malloc(strlen(yytext) + 1);
+	strcpy(r->interval, yytext);
 }
 
 void handle_calendar(void)
 {
 	printf("calendar: %s", yytext);
+	yytext = trim(yytext);
+
+	struct rule *r = &rules[nrules - 1];
+	r->ncal++;
+	r->cal = try_realloc(r->cal, r->ncal * sizeof *r->cal);
+	struct calendar *c = &r->cal[r->ncal - 1];
+	memset(c, 0, sizeof *c);
+
+	int i = -1;
+	for (char *entry = strtok(yytext, " \t");
+	     entry;
+	     entry = strtok(NULL, " \t")) {
+		i++;
+		if (entry[0] == '*')
+			continue;
+		c->ent[i] = try_malloc(strlen(entry) + 1);
+		strcpy(c->ent[i], entry);
+	}
 }
 
 void handle_envar(void)
@@ -199,4 +229,10 @@ void handle_verbatimLine(void)
 void handle_unknownOpt(void)
 {
 	printf("unknownOpt: %s", yytext);
+}
+
+
+void handle_invalid(void)
+{
+	printf("(%d) invalid: %s\n", yylineno, yytext);
 }

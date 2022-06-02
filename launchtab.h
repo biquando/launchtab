@@ -21,18 +21,16 @@ void handle_verbatimEnd(void);
 void handle_verbatimLine(void);
 void handle_unknownOpt(void);
 
+void handle_invalid(void);
+
 struct calendar {
-	unsigned char minute;
-	unsigned char hour;
-	unsigned char day;
-	unsigned char month;
-	unsigned char weekday;
+	char *ent[5];
 };
 
 struct rule {
 	char *id;
 	char *command;
-	unsigned long interval;
+	char *interval;
 	struct calendar *cal;
 	unsigned int ncal;
 	char **varlabels;

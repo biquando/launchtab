@@ -99,12 +99,24 @@ int main(void)
 	lex_init();
 	yylex();
 
-	printf("=================================\n");
 	/* Test rules */
+	printf("\n=================================\n\n");
 	for (int i = 0; i < nrules; i++) {
 		struct rule r = rules[i];
 		printf("[%s]\n", r.id);
 		printf("%s\n", r.command);
+		if (r.interval)
+			printf("Interval: %s\n", r.interval);
+		for (int c = 0; c < r.ncal; c++) {
+			printf("Calendar:");
+			for (int e = 0; e < 5; e++) {
+				printf(" (");
+				if (r.cal[c].ent[e])
+					printf("%s", r.cal[c].ent[e]);
+				printf(")");
+			}
+			printf("\n");
+		}
 	}
 
 	/* Free rules */
