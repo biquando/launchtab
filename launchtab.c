@@ -16,6 +16,9 @@
 #define TAB    "launch.tab"
 #define TABPATH CONFIG TABDIR TAB
 
+struct rule *rules;
+unsigned int nrules;
+
 void make_dirs(const char *home)
 {
 	char *path;
@@ -88,9 +91,40 @@ int main(void)
 		return 0;
 	}
 
+	/* Initialize rules */
+	rules = NULL;
+	nrules = 0;
+
 	yyin = fd;
 	lex_init();
 	yylex();
+
+	printf("=================================\n");
+	/* Test rules */
+	for (int i = 0; i < nrules; i++) {
+		struct rule r = rules[i];
+		printf("[%s]\n", r.id);
+		printf("%s\n", r.command);
+	}
+
+	/* Free rules */
+	for (int i = 0; i < nrules; i++) {
+		struct rule r = rules[i];
+		free(r.id);
+		free(r.command);
+		free(r.cal);
+		for (int v = 0; v < r.nvar; v++) {
+			free(r.varlabels[v]);
+			free(r.varvalues[v]);
+		}
+		free(r.varlabels);
+		free(r.varvalues);
+		free(r.fd[0]);
+		free(r.fd[1]);
+		free(r.fd[2]);
+		free(r.verbatim);
+	}
+	free(rules);
 
 	fclose(fd);
 	free(tabpath);

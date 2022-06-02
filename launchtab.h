@@ -35,11 +35,14 @@ struct rule {
 	unsigned long interval;
 	struct calendar *cal;
 	unsigned int ncal;
+	char **varlabels;
+	char **varvalues;
+	unsigned int nvar;
 	char *fd[3];
 	char *verbatim;
 };
 
-void rule_init(struct rule *r);
-void rule_free(struct rule *r);
+extern struct rule *rules;
+extern unsigned int nrules;
 
 #endif

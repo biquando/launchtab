@@ -1,8 +1,11 @@
 %{
+#include <ctype.h>
+#include <stdlib.h>
+#include <string.h>
 #include "launchtab.h"
 %}
 
-id             ^{space}?\[.+\]\n
+id             ^\[.+\]\n
 comment        ^{space}?#.*\n
 emptyLine      ^{space}?\n
 commandMulti   ^{space}?.*\\\n
@@ -59,9 +62,55 @@ void lex_init(void)
 	BEGIN OPTSC;
 }
 
+
+/* Remove leading and trailing whitespace */
+static char *trim(char *str)
+{
+	if (!str)
+		return str;
+
+	while (isspace(*str)) str++;
+
+	if (*str) {
+		char *end = str + strlen(str) - 1;
+		while (end > str && isspace(*end)) end--;
+		end[1] = '\0';
+	}
+
+	return str;
+}
+
+static void *try_malloc(size_t size)
+{
+	void *ptr = malloc(size);
+	if (!ptr)
+		exit(6);
+	return ptr;
+}
+
+static void *try_realloc(void *ptr, size_t size)
+{
+	ptr = realloc(ptr, size);
+	if (!ptr)
+		exit(6);
+	return ptr;
+}
+
+
 void handle_id(void)
 {
 	printf("id: %s", yytext);
+	nrules++;
+	rules = try_realloc(rules, nrules * sizeof *rules);
+
+	struct rule *r = &rules[nrules - 1];
+	memset(r, 0, sizeof *r);
+
+	yytext = trim(yytext);
+	int len = strlen(yytext);
+	yytext[len - 1] = '\0'; /* remove trailing ] */
+	r->id = try_malloc(len);
+	strcpy(r->id, yytext + 1); /* remove leading [ */
 }
 
 void handle_comment(void)
@@ -76,12 +125,28 @@ void handle_emptyLine(void)
 
 void handle_commandMulti(void)
 {
-	printf("commandMulti: %s", yytext);
+	handle_command();
 }
 
 void handle_command(void)
 {
 	printf("command: %s", yytext);
+	yytext = trim(yytext);
+	int len = strlen(yytext);
+	if (len > 1 && yytext[len-1] == '\\') {
+		yytext[len-2] = '\0'; /* remove trailing backslash */
+	}
+
+	struct rule *r = &rules[nrules - 1];
+	if (r->command) {
+		int l1 = strlen(r->command);
+		int l2 = strlen(yytext);
+		r->command = try_realloc(r->command, l1 + l2 + 1);
+		strcpy(r->command + l1, yytext);
+	} else {
+		r->command = try_malloc(strlen(yytext) + 1);
+		strcpy(r->command, yytext);
+	}
 }
 
 
