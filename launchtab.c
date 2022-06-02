@@ -96,10 +96,12 @@ static void write_plist(char *launchpath, struct rule r)
 		return;
 	}
 
-	char *path = try_malloc(strlen(launchpath) + strlen(r.id) + 2);
+	char *path = try_malloc(strlen(launchpath) + strlen(r.id)
+			+ sizeof ".plist");
 	strcpy(path, launchpath);
 	strcpy(path + strlen(path), "/");
 	strcpy(path + strlen(path), r.id);
+	strcpy(path + strlen(path), ".plist");
 
 	fprintf(stderr, "path: %s\n", path);
 
