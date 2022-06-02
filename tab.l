@@ -77,7 +77,7 @@ static char *trim(char *str)
 	return str;
 }
 
-static void *try_malloc(size_t size)
+void *try_malloc(size_t size)
 {
 	void *ptr = malloc(size);
 	if (!ptr)
@@ -85,7 +85,7 @@ static void *try_malloc(size_t size)
 	return ptr;
 }
 
-static void *try_realloc(void *ptr, size_t size)
+void *try_realloc(void *ptr, size_t size)
 {
 	ptr = realloc(ptr, size);
 	if (!ptr)
@@ -132,7 +132,7 @@ void handle_command(void)
 	yytext = trim(yytext);
 	int len = strlen(yytext);
 	if (len > 1 && yytext[len-1] == '\\') {
-		yytext[len-2] = '\0'; /* remove trailing backslash */
+		yytext[len-1] = '\0'; /* remove trailing backslash */
 	}
 
 	struct rule *r = &rules[nrules - 1];

@@ -3,6 +3,9 @@
 
 void lex_init(void);
 
+void *try_malloc(size_t size);
+void *try_realloc(void *ptr, size_t size);
+
 void handle_id(void);
 void handle_comment(void);
 void handle_emptyLine(void);
@@ -24,6 +27,9 @@ void handle_invalid(void);
 struct calendar {
 	char *ent[5];
 };
+
+extern const char *caltype[5];
+extern const char *fdtype[3];
 
 struct rule {
 	char *id;

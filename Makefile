@@ -24,4 +24,4 @@ tab.yy.c: tab.l
 
 clean:
 	rm -f $(OBJ) tab.yy.* bin/*
-	rmdir bin
+	rmdir bin || :
