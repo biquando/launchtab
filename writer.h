@@ -8,4 +8,6 @@ void make_dirs(const char *home);
 FILE *edit_file(const char *file);
 void write_plist(char *launchpath, struct rule r);
 
+void print_dbg(char *format, ...);
+
 #endif

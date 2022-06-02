@@ -1,9 +1,12 @@
 #include <ctype.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "launchtab.h"
+#include "style.h"
+#include "writer.h"
 
 extern char *yytext;
 extern int yylineno;
@@ -28,23 +31,27 @@ static char *trim(char *str)
 void *try_malloc(size_t size)
 {
 	void *ptr = malloc(size);
-	if (!ptr)
-		exit(6);
+	if (!ptr) {
+		perror(NULL);
+		exit(errno);
+	}
 	return ptr;
 }
 
 void *try_realloc(void *ptr, size_t size)
 {
 	ptr = realloc(ptr, size);
-	if (!ptr)
-		exit(6);
+	if (!ptr) {
+		perror(NULL);
+		exit(errno);
+	}
 	return ptr;
 }
 
 
 void handle_id(void)
 {
-	printf("id: %s", yytext);
+	print_dbg("id: %s", yytext);
 	yytext = trim(yytext);
 
 	nrules++;
@@ -61,12 +68,12 @@ void handle_id(void)
 
 void handle_comment(void)
 {
-	printf("comment: %s", yytext);
+	print_dbg("comment: %s", yytext);
 }
 
 void handle_emptyLine(void)
 {
-	printf("emptyLine: %s", yytext);
+	print_dbg("emptyLine: %s", yytext);
 }
 
 void handle_commandMulti(void)
@@ -76,7 +83,7 @@ void handle_commandMulti(void)
 
 void handle_command(void)
 {
-	printf("command: %s", yytext);
+	print_dbg("command: %s", yytext);
 	yytext = trim(yytext);
 	int len = strlen(yytext);
 	if (len > 1 && yytext[len-1] == '\\') {
@@ -100,7 +107,7 @@ void handle_command(void)
 
 void handle_interval(void)
 {
-	printf("interval: %s", yytext);
+	print_dbg("interval: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof("Interval");
 	yytext = trim(yytext);
@@ -112,7 +119,7 @@ void handle_interval(void)
 
 void handle_calendar(void)
 {
-	printf("calendar: %s", yytext);
+	print_dbg("calendar: %s", yytext);
 	yytext = trim(yytext);
 
 	struct rule *r = &rules[nrules - 1];
@@ -135,7 +142,7 @@ void handle_calendar(void)
 
 void handle_envar(void)
 {
-	printf("envar: %s", yytext);
+	print_dbg("envar: %s", yytext);
 
 	char *label = yytext;
 	while (isspace(*label)) label++;
@@ -162,7 +169,7 @@ void handle_envar(void)
 
 void handle_stdin(void)
 {
-	printf("stdin: %s", yytext);
+	print_dbg("stdin: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof "<" - 1;
 	yytext = trim(yytext);
@@ -174,7 +181,7 @@ void handle_stdin(void)
 
 void handle_stdout(void)
 {
-	printf("stdout: %s", yytext);
+	print_dbg("stdout: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof ">" - 1;
 	yytext = trim(yytext);
@@ -186,7 +193,7 @@ void handle_stdout(void)
 
 void handle_stderr(void)
 {
-	printf("stderr: %s", yytext);
+	print_dbg("stderr: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof "2>" - 1;
 	yytext = trim(yytext);
@@ -199,7 +206,7 @@ void handle_stderr(void)
 
 void handle_verbatim(void)
 {
-	printf("verbatim: %s", yytext);
+	print_dbg("verbatim: %s", yytext);
 	yytext += sizeof "---";
 
 	struct rule *r = &rules[nrules - 1];
@@ -211,10 +218,10 @@ void handle_verbatim(void)
 
 void handle_unknownOpt(void)
 {
-	printf("unknownOpt: %s", yytext);
+	fprintf(stderr, LTWARNL("unknown option: %s"), yylineno, yytext);
 }
 
 void handle_invalid(void)
 {
-	printf("(%d) invalid: %s\n", yylineno, yytext);
+	fprintf(stderr, LTERRL("invalid token\n"), yylineno);
 }

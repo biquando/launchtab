@@ -1,3 +1,5 @@
+#include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,6 +8,8 @@
 #include <unistd.h>
 
 #include "launchtab.h"
+#include "style.h"
+#include "writer.h"
 
 const char *caltype[5] = {
 	"Minute",
@@ -30,10 +34,16 @@ void make_dirs(const char *home)
 	strcpy(path, home);
 
 	strcpy(path + strlen(path), "/" CONFIG);
-	mkdir(path, 0755);
+	if (mkdir(path, 0755) < 0 && errno != EEXIST) {
+		perror(NULL);
+		exit(errno);
+	}
 
 	strcpy(path + strlen(path), TABDIR);
-	mkdir(path, 0755);
+	if (mkdir(path, 0755) < 0 && errno != EEXIST) {
+		perror(NULL);
+		exit(errno);
+	}
 
 	free(path);
 }
@@ -52,11 +62,14 @@ FILE *edit_file(const char *file)
 		oldtime = statbuf.st_mtimespec;
 
 	pid_t child = fork();
-	if (child < 0)
-		exit(1);
+	if (child < 0) {
+		perror(NULL);
+		exit(errno);
+	}
 	if (child == 0) {
 		execlp(editor, editor, file, NULL);
-		exit(2);
+		perror(NULL);
+		exit(errno);
 	}
 	wait(NULL);
 
@@ -73,7 +86,7 @@ FILE *edit_file(const char *file)
 
 static void invalid_rule(struct rule *r)
 {
-	fprintf(stderr, "launchtab: invalid rule %s\n", r->id);
+	fprintf(stderr, LTERR("invalid rule %s\n"), r->id);
 }
 
 void write_plist(char *launchpath, struct rule r)
@@ -90,11 +103,11 @@ void write_plist(char *launchpath, struct rule r)
 	strcpy(path + strlen(path), r.id);
 	strcpy(path + strlen(path), ".plist");
 
-	fprintf(stderr, "path: %s\n", path);
+	print_dbg("path: %s\n", path);
 
 	FILE *f = fopen(path, "w");
 	if (!f) {
-		fprintf(stderr, "launchtab: couldn't open file %s to write\n",
+		fprintf(stderr, LTERR("couldn't open file %s to write\n"),
 				path);
 		return;
 	}
@@ -190,4 +203,17 @@ void write_plist(char *launchpath, struct rule r)
 
 	free(path);
 	fclose(f);
+
+	fprintf(stderr, FBOLD"launchtab:"FRESET" wrote rule: %s\n", r.id);
+}
+
+void print_dbg(char *format, ...)
+{
+	if (!debug)
+		return;
+
+	va_list ap;
+	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
 }

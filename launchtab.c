@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -9,7 +10,7 @@
 
 struct rule *rules;
 unsigned int nrules;
-
+int debug = 0;
 
 int main(void)
 {
@@ -18,8 +19,10 @@ int main(void)
 	char *tabpath;
 	char *launchpath;
 
-	if (!home)
-		return 5;
+	if (!home) {
+		fprintf(stderr, "Error: Missing $HOME variable.\n");
+		exit(ENOENT);
+	}
 
 	tabpath = try_malloc(strlen(home) + sizeof "/" TABPATH);
 	strcpy(tabpath, home);
@@ -44,31 +47,34 @@ int main(void)
 	lex_init();
 	yylex();
 
-	/* Test rules */
-	printf("\n=================================\n\n");
-	for (int i = 0; i < nrules; i++) {
-		struct rule r = rules[i];
-		printf("[%s]\n", r.id);
-		printf("%s\n", r.command);
-		if (r.interval)
-			printf("Interval: %s\n", r.interval);
-		for (int c = 0; c < r.ncal; c++) {
-			printf("Calendar:");
-			for (int e = 0; e < 5; e++) {
-				printf(" %s", r.cal[c].ent[e]);
+	/* Print rules */
+	if (debug) {
+		fprintf(stderr, "\n=================================\n\n");
+		for (int i = 0; i < nrules; i++) {
+			struct rule r = rules[i];
+			fprintf(stderr, "[%s]\n", r.id);
+			fprintf(stderr, "%s\n", r.command);
+			if (r.interval)
+				fprintf(stderr, "Interval: %s\n", r.interval);
+			for (int c = 0; c < r.ncal; c++) {
+				fprintf(stderr, "Calendar:");
+				for (int e = 0; e < 5; e++) {
+					fprintf(stderr, " %s", r.cal[c].ent[e]);
+				}
+				fprintf(stderr, "\n");
 			}
-			printf("\n");
+			for (int v = 0; v < r.nvar; v++) {
+				fprintf(stderr, "Variable: %s = %s\n",
+						r.varlabels[v], r.varvalues[v]);
+			}
+			fprintf(stderr, "stdin: %s\n", r.fd[0]);
+			fprintf(stderr, "stdout: %s\n", r.fd[1]);
+			fprintf(stderr, "stderr: %s\n", r.fd[2]);
+			fprintf(stderr, "verbatim: %s\n", r.verbatim);
 		}
-		for (int v = 0; v < r.nvar; v++) {
-			printf("Variable: %s = %s\n",
-					r.varlabels[v], r.varvalues[v]);
-		}
-		printf("stdin: %s\n", r.fd[0]);
-		printf("stdout: %s\n", r.fd[1]);
-		printf("stderr: %s\n", r.fd[2]);
-		printf("verbatim: %s\n", r.verbatim);
 	}
 
+	/* Write rules */
 	for (int r = 0; r < nrules; r++) {
 		write_plist(launchpath, rules[r]);
 	}
