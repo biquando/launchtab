@@ -110,13 +110,17 @@ int main(void)
 		for (int c = 0; c < r.ncal; c++) {
 			printf("Calendar:");
 			for (int e = 0; e < 5; e++) {
-				printf(" (");
-				if (r.cal[c].ent[e])
-					printf("%s", r.cal[c].ent[e]);
-				printf(")");
+				printf(" %s", r.cal[c].ent[e]);
 			}
 			printf("\n");
 		}
+		for (int v = 0; v < r.nvar; v++) {
+			printf("Variable: %s = %s\n",
+					r.varlabels[v], r.varvalues[v]);
+		}
+		printf("stdin: %s\n", r.fd[0]);
+		printf("stdout: %s\n", r.fd[1]);
+		printf("stderr: %s\n", r.fd[2]);
 	}
 
 	/* Free rules */

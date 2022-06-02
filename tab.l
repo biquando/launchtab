@@ -147,7 +147,7 @@ void handle_command(void)
 		r->command = try_realloc(r->command, l1 + l2 + 1);
 		strcpy(r->command + l1, yytext);
 	} else {
-		r->command = try_malloc(strlen(yytext) + 1);
+		r->command = try_realloc(r->command, strlen(yytext) + 1);
 		strcpy(r->command, yytext);
 	}
 }
@@ -163,7 +163,7 @@ void handle_interval(void)
 	yytext = trim(yytext);
 
 	struct rule *r = &rules[nrules - 1];
-	r->interval = try_malloc(strlen(yytext) + 1);
+	r->interval = try_realloc(r->interval, strlen(yytext) + 1);
 	strcpy(r->interval, yytext);
 }
 
@@ -193,21 +193,64 @@ void handle_calendar(void)
 void handle_envar(void)
 {
 	printf("envar: %s", yytext);
+
+	char *label = yytext;
+	while (isspace(*label)) label++;
+
+	char *value = label;
+	while (*value != '=') value++;
+	*value = '\0';
+	value++;
+
+	int labellen = strlen(label);
+	int valuelen = strlen(value);
+	value[valuelen - 1] = '\0';
+
+	struct rule *r = &rules[nrules - 1];
+	r->nvar++;
+	r->varlabels = try_realloc(r->varlabels,r->nvar * sizeof *r->varlabels);
+	r->varvalues = try_realloc(r->varvalues,r->nvar * sizeof *r->varvalues);
+
+	r->varlabels[r->nvar-1] = try_malloc(labellen);
+	r->varvalues[r->nvar-1] = try_malloc(valuelen);
+	strcpy(r->varlabels[r->nvar-1], label);
+	strcpy(r->varvalues[r->nvar-1], value);
 }
 
 void handle_stdin(void)
 {
 	printf("stdin: %s", yytext);
+	yytext = trim(yytext);
+	yytext += sizeof "<" - 1;
+	yytext = trim(yytext);
+
+	struct rule *r = &rules[nrules - 1];
+	r->fd[0] = try_realloc(r->fd[0], strlen(yytext) + 1);
+	strcpy(r->fd[0], yytext);
 }
 
 void handle_stdout(void)
 {
 	printf("stdout: %s", yytext);
+	yytext = trim(yytext);
+	yytext += sizeof ">" - 1;
+	yytext = trim(yytext);
+
+	struct rule *r = &rules[nrules - 1];
+	r->fd[1] = try_realloc(r->fd[1], strlen(yytext) + 1);
+	strcpy(r->fd[1], yytext);
 }
 
 void handle_stderr(void)
 {
 	printf("stderr: %s", yytext);
+	yytext = trim(yytext);
+	yytext += sizeof "2>" - 1;
+	yytext = trim(yytext);
+
+	struct rule *r = &rules[nrules - 1];
+	r->fd[2] = try_realloc(r->fd[2], strlen(yytext) + 1);
+	strcpy(r->fd[2], yytext);
 }
 
 
