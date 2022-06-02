@@ -16,9 +16,7 @@ envar          ^{space}?[a-zA-Z0-9_]+=.*\n
 stdin          ^{space}?\<.+\n
 stdout         ^{space}?\>.+\n
 stderr         ^{space}?2\>.+\n
-verbatimStart  ^{space}?---\n
-verbatimEnd    ^{space}?---\n
-verbatimLine   ^{space}?.*\n
+verbatim       ^---\n(.|\n)*\n---\n
 unknownOpt     ^{space}?.*\n
 
 space [ \t]+
@@ -27,7 +25,6 @@ calEntry (\*|([0-9]+))
 %s INISC
 %s COMSC
 %s OPTSC
-%x VERSC
 
 %%
 
@@ -45,9 +42,7 @@ calEntry (\*|([0-9]+))
 <OPTSC>{stdout}        {handle_stdout();                     }
 <OPTSC>{stderr}        {handle_stderr();                     }
 
-<OPTSC>{verbatimStart} {handle_verbatimStart();  BEGIN VERSC;}
-<VERSC>{verbatimEnd}   {handle_verbatimEnd();    BEGIN OPTSC;}
-<VERSC>{verbatimLine}  {handle_verbatimLine();               }
+<OPTSC>{verbatim}      {handle_verbatim();                   }
 <OPTSC>{unknownOpt}    {handle_unknownOpt();                 }
 
 <*>.|\n                {handle_invalid();      yyterminate();}
@@ -254,19 +249,16 @@ void handle_stderr(void)
 }
 
 
-void handle_verbatimStart(void)
+void handle_verbatim(void)
 {
-	printf("verbatimStart: %s", yytext);
-}
+	printf("verbatim: %s", yytext);
+	yytext += sizeof "---";
 
-void handle_verbatimEnd(void)
-{
-	printf("verbatimEnd: %s", yytext);
-}
-
-void handle_verbatimLine(void)
-{
-	printf("verbatimLine: %s", yytext);
+	struct rule *r = &rules[nrules - 1];
+	int len = strlen(yytext) - sizeof "---";
+	yytext[len] = '\0';
+	r->verbatim = try_realloc(r->verbatim, len + 1);
+	strcpy(r->verbatim, yytext);
 }
 
 void handle_unknownOpt(void)

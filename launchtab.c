@@ -121,6 +121,7 @@ int main(void)
 		printf("stdin: %s\n", r.fd[0]);
 		printf("stdout: %s\n", r.fd[1]);
 		printf("stderr: %s\n", r.fd[2]);
+		printf("verbatim: %s", r.verbatim);
 	}
 
 	/* Free rules */
