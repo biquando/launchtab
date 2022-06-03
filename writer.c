@@ -25,6 +25,52 @@ const char *fdtype[3] = {
 	"Err"
 };
 
+int mkdir_p(const char *path)
+{
+	char *buf = try_malloc(strlen(path) + 1);
+	strcpy(buf, path);
+
+	for (char *p = buf; *p != '\0'; p++) {
+		if (*p != '/' || p == buf)
+			continue;
+
+		*p = '\0';
+		if (mkdir(buf, 0755) < 0 && errno != EEXIST)
+			return -1;
+		*p = '/';
+	}
+	if (mkdir(buf, 0755) < 0 && errno != EEXIST)
+		return -1;
+
+	return 0;
+}
+
+size_t dirname(const char *path, char *output)
+{
+	size_t i;
+	if (!path)
+		return 0;
+	i = strlen(path);
+
+	/* strip trailing slashes */
+	while (i > 0 && path[i - 1] == '/')
+		i--;
+
+	/* strip last entry */
+	while (i > 0 && path[i - 1] != '/')
+		i--;
+
+	/* strip trailing slashes */
+	while (i > 0 && path[i - 1] == '/')
+		i--;
+
+	if (output) {
+		strncpy(output, path, i);
+		output[i] = '\0';
+	}
+	return i;
+}
+
 void make_dirs(const char *home)
 {
 	char *path;

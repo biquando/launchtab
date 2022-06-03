@@ -14,9 +14,27 @@ struct rule *rules;
 unsigned int nrules;
 int debug = 0;
 
-static void edit_tab(char *home, char *tabpath, char *launchpath)
+static void edit_tab(char *tabpath, char *launchpath)
 {
-	make_dirs(home);
+	/* mkdir_p: dirname(tabpath) and launchpath */
+	size_t tabdirlen = dirname(tabpath, NULL);
+	char tmp = tabpath[tabdirlen];
+	tabpath[tabdirlen] = '\0';
+	if (mkdir_p(launchpath) < 0) {
+		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
+				launchpath);
+		perror(NULL);
+		exit(errno);
+	}
+	if (mkdir_p(tabpath) < 0) {
+		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
+				tabpath);
+		perror(NULL);
+		exit(errno);
+	}
+	tabpath[tabdirlen] = tmp;
+
+	/* Edit tab file */
 	FILE *fd = edit_file(tabpath);
 	if (!fd) {
 		fprintf(stderr, FBOLD"launchtab:"FRESET
@@ -108,7 +126,7 @@ int main(int argc, char *argv[])
 	struct taboptions opts = parseopts(argc, argv);
 	switch (opts.op) {
 	case EDTAB:
-		edit_tab(home, tabpath, launchpath);
+		edit_tab(tabpath, launchpath);
 		break;
 	case LSTAB:
 		fprintf(stderr, "This operation is not implemented yet.\n");

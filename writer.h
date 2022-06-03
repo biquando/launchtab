@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include "launchtab.h"
 
+int mkdir_p(const char *path);
+size_t dirname(const char *path, char *output);
+
 void make_dirs(const char *home);
 FILE *edit_file(const char *file);
 void write_plist(char *launchpath, struct rule r);
