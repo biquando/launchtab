@@ -5,40 +5,23 @@
 
 #define YY_HEADER_EXPORT_START_CONDITIONS
 #include "launchtab.h"
-#include "tab.yy.h"
+#include "options.h"
 #include "style.h"
+#include "tab.yy.h"
 #include "writer.h"
 
 struct rule *rules;
 unsigned int nrules;
 int debug = 0;
 
-int main(void)
+static void edit_tab(char *home, char *tabpath, char *launchpath)
 {
-	FILE *fd;
-	char *home = getenv("HOME");
-	char *tabpath;
-	char *launchpath;
-
-	if (!home) {
-		fprintf(stderr, "Error: Missing $HOME variable.\n");
-		exit(ENOENT);
-	}
-
-	tabpath = try_malloc(strlen(home) + sizeof "/" TABPATH);
-	strcpy(tabpath, home);
-	strcpy(tabpath + strlen(home), "/" TABPATH);
-
-	launchpath = try_malloc(strlen(home) + sizeof "/" LAUNCHPATH);
-	strcpy(launchpath, home);
-	strcpy(launchpath + strlen(home), "/" LAUNCHPATH);
-
 	make_dirs(home);
-	fd = edit_file(tabpath);
+	FILE *fd = edit_file(tabpath);
 	if (!fd) {
 		fprintf(stderr, FBOLD"launchtab:"FRESET
 				" no changes made to "TAB"\n");
-		return 0;
+		exit(0);
 	}
 
 	/* Initialize rules */
@@ -101,6 +84,43 @@ int main(void)
 	free(rules);
 
 	fclose(fd);
+}
+
+int main(int argc, char *argv[])
+{
+	char *home = getenv("HOME");
+	char *tabpath;     /* ~/.config/launchtab/launch.tab */
+	char *launchpath;  /* ~/Library/LaunchAgents */
+
+	if (!home) {
+		fprintf(stderr, LTERR("missing $HOME variable.\n"));
+		exit(ENOENT);
+	}
+
+	tabpath = try_malloc(strlen(home) + sizeof "/" TABPATH);
+	strcpy(tabpath, home);
+	strcpy(tabpath + strlen(home), "/" TABPATH);
+
+	launchpath = try_malloc(strlen(home) + sizeof "/" LAUNCHPATH);
+	strcpy(launchpath, home);
+	strcpy(launchpath + strlen(home), "/" LAUNCHPATH);
+
+	struct taboptions opts = parseopts(argc, argv);
+	switch (opts.op) {
+	case EDTAB:
+		edit_tab(home, tabpath, launchpath);
+		break;
+	case LSTAB:
+		fprintf(stderr, "This operation is not implemented yet.\n");
+		break;
+	case RMTAB:
+		fprintf(stderr, "This operation is not implemented yet.\n");
+		break;
+	default:
+		exit(EINVAL);
+	}
+
 	free(tabpath);
+	free(launchpath);
 	return 0;
 }
