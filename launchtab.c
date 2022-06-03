@@ -6,6 +6,7 @@
 #define YY_HEADER_EXPORT_START_CONDITIONS
 #include "launchtab.h"
 #include "tab.yy.h"
+#include "style.h"
 #include "writer.h"
 
 struct rule *rules;
@@ -35,7 +36,8 @@ int main(void)
 	make_dirs(home);
 	fd = edit_file(tabpath);
 	if (!fd) {
-		fprintf(stderr, "launchtab: no changes made to "TAB"\n");
+		fprintf(stderr, FBOLD"launchtab:"FRESET
+				" no changes made to "TAB"\n");
 		return 0;
 	}
 
