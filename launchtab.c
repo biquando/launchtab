@@ -146,6 +146,14 @@ static void list_tab()
 	fclose(fd);
 }
 
+static void remove_tab()
+{
+	if (unlink(tabpath) < 0) {
+		perror(NULL);
+		exit(errno);
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	char *home = getenv("HOME");
@@ -208,7 +216,7 @@ int main(int argc, char *argv[])
 		list_tab();
 		break;
 	case RMTAB:
-		fprintf(stderr, "This operation is not implemented yet.\n");
+		remove_tab();
 		break;
 	default:
 		exit(EINVAL);
