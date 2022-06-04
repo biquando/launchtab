@@ -2,7 +2,7 @@ CC = gcc
 LD = gcc
 LEX = flex
 
-CFLAGS =
+CFLAGS = -Wall
 LDFLAGS =
 
 SRC = $(wildcard *.c)

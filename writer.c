@@ -71,29 +71,6 @@ size_t dirname(const char *path, char *output)
 	return i;
 }
 
-void make_dirs(const char *home)
-{
-	char *path;
-
-	path = try_malloc(strlen(home) + sizeof "/" CONFIG TABDIR);
-
-	strcpy(path, home);
-
-	strcpy(path + strlen(path), "/" CONFIG);
-	if (mkdir(path, 0755) < 0 && errno != EEXIST) {
-		perror(NULL);
-		exit(errno);
-	}
-
-	strcpy(path + strlen(path), TABDIR);
-	if (mkdir(path, 0755) < 0 && errno != EEXIST) {
-		perror(NULL);
-		exit(errno);
-	}
-
-	free(path);
-}
-
 FILE *edit_file(const char *file)
 {
 	char *editor = getenv("EDITOR");
