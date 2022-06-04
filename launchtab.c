@@ -118,7 +118,7 @@ static void import_tab(FILE *fd)
 
 static void edit_tab()
 {
-	if (edit_file(tabpath) < 0) {
+	if (!edit_file(tabpath)) {
 		fprintf(stderr, FBOLD"launchtab:"FRESET
 				" no changes made to "TAB"\n");
 		return;
