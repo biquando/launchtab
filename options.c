@@ -54,11 +54,19 @@ struct taboptions parseopts(int argc, char *argv[])
 			usage(EINVAL);
 		}
 	}
-	argc -= optind;
-	argv += optind;
+	opts.argc = argc - optind;
+	opts.argv = argv + optind;
 
-	if (!opts.op)
-		opts.op = EDTAB;
+	if (opts.op && opts.argc > 0) {
+		fprintf(stderr,
+			LTERR("no arguments permitted after this option\n"));
+		usage(EINVAL);
+	}
+
+	if (opts.argc > 1) {
+		fprintf(stderr, LTERR("only one file argument allowed\n"));
+		usage(EINVAL);
+	}
 
 	return opts;
 }

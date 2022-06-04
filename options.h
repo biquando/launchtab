@@ -2,10 +2,12 @@
 #define _LAUNCHTAB_OPTIONS_H
 
 enum tabop {
-	EDTAB=1, LSTAB, RMTAB
+	IMTAB=0, EDTAB, LSTAB, RMTAB
 };
 
 struct taboptions {
+	int argc;
+	char **argv;
 	enum tabop op;
 	int debug;
 };

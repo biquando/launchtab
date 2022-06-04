@@ -71,7 +71,23 @@ size_t dirname(const char *path, char *output)
 	return i;
 }
 
-FILE *edit_file(const char *file)
+int cpfile(FILE *src, FILE *dst)
+{
+	char buf[4096];
+	rewind(src);
+	rewind(dst);
+
+	while (!feof(src)) {
+		size_t nbytes = fread(buf, 1, sizeof buf, src);
+		if (nbytes > 0 && fwrite(buf, 1, nbytes, dst) != nbytes) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
+
+int edit_file(const char *file)
 {
 	char *editor = getenv("EDITOR");
 	struct timespec oldtime = {0};
@@ -109,10 +125,10 @@ FILE *edit_file(const char *file)
 
 	if (oldtime.tv_sec == newtime.tv_sec
 			&& oldtime.tv_nsec == newtime.tv_nsec) {
-		return NULL; /* tab file was not modified */
+		return 0; /* tab file was not modified */
 	}
 
-	return fopen(file, "r");
+	return 1;
 }
 
 void write_plist(char *launchpath, struct rule r)

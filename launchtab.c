@@ -13,33 +13,15 @@
 struct rule *rules;
 unsigned int nrules;
 int debug = 0;
+static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
+static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
-static void edit_tab(char *tabpath, char *launchpath)
+static void install_tab()
 {
-	/* mkdir_p: dirname(tabpath) and launchpath */
-	size_t tabdirlen = dirname(tabpath, NULL);
-	char tmp = tabpath[tabdirlen];
-	tabpath[tabdirlen] = '\0';
-	if (mkdir_p(launchpath) < 0) {
-		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
-				launchpath);
-		perror(NULL);
-		exit(errno);
-	}
-	if (mkdir_p(tabpath) < 0) {
-		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
-				tabpath);
-		perror(NULL);
-		exit(errno);
-	}
-	tabpath[tabdirlen] = tmp;
-
-	/* Edit tab file */
-	FILE *fd = edit_file(tabpath);
+	FILE *fd = fopen(tabpath, "r");
 	if (!fd) {
-		fprintf(stderr, FBOLD"launchtab:"FRESET
-				" no changes made to "TAB"\n");
-		exit(0);
+		perror(NULL);
+		exit(errno);
 	}
 
 	/* Initialize rules */
@@ -102,13 +84,51 @@ static void edit_tab(char *tabpath, char *launchpath)
 	free(rules);
 
 	fclose(fd);
+
+}
+
+static void import_tab(FILE *fd)
+{
+	if (!fd) {
+		if (!(fd = tmpfile())) {
+			perror(NULL);
+			exit(errno);
+		}
+		if (cpfile(stdin, fd) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+	}
+
+	FILE *tabfd;
+	if (!(tabfd = fopen(tabpath, "w"))) {
+		perror(NULL);
+		exit(errno);
+	}
+	if (cpfile(fd, tabfd) < 0) {
+		perror(NULL);
+		exit(errno);
+	}
+
+	fclose(fd); /* note that this function closes fd */
+	fclose(tabfd);
+
+	install_tab();
+}
+
+static void edit_tab()
+{
+	if (edit_file(tabpath) < 0) {
+		fprintf(stderr, FBOLD"launchtab:"FRESET
+				" no changes made to "TAB"\n");
+		return;
+	}
+	install_tab();
 }
 
 int main(int argc, char *argv[])
 {
 	char *home = getenv("HOME");
-	char *tabpath;     /* ~/.config/launchtab/launch.tab */
-	char *launchpath;  /* ~/Library/LaunchAgents */
 
 	if (!home) {
 		fprintf(stderr, LTERR("missing $HOME variable.\n"));
@@ -123,10 +143,46 @@ int main(int argc, char *argv[])
 	strcpy(launchpath, home);
 	strcpy(launchpath + strlen(home), "/" LAUNCHPATH);
 
+	/* mkdir_p: dirname(tabpath) and launchpath */
+	size_t tabdirlen = dirname(tabpath, NULL);
+	char tmpc = tabpath[tabdirlen];
+	tabpath[tabdirlen] = '\0';
+	if (mkdir_p(launchpath) < 0) {
+		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
+				launchpath);
+		perror(NULL);
+		exit(errno);
+	}
+	if (mkdir_p(tabpath) < 0) {
+		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
+				tabpath);
+		perror(NULL);
+		exit(errno);
+	}
+	tabpath[tabdirlen] = tmpc;
+
 	struct taboptions opts = parseopts(argc, argv);
+	argc = opts.argc;
+	argv = opts.argv;
+	debug = opts.debug;
+
+	FILE *fd;
 	switch (opts.op) {
+	case IMTAB:
+		if (argc > 0) {
+			fd = fopen(argv[0], "r");
+			if (!fd) {
+				fprintf(stderr, LTERR("%s: "), argv[0]);
+				perror(NULL);
+				exit(errno);
+			}
+		} else {
+			fd = NULL;
+		}
+		import_tab(fd);
+		break;
 	case EDTAB:
-		edit_tab(tabpath, launchpath);
+		edit_tab();
 		break;
 	case LSTAB:
 		fprintf(stderr, "This operation is not implemented yet.\n");
