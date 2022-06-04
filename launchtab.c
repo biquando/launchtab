@@ -126,6 +126,26 @@ static void edit_tab()
 	install_tab();
 }
 
+static void list_tab()
+{
+	FILE *fd = fopen(tabpath, "r");
+	if (!fd && errno == ENOENT) {
+		if (errno == ENOENT)
+			fprintf(stderr,
+				LTERR("user does not have a launchtab\n"));
+		else
+			perror(NULL);
+		exit(errno);
+	}
+
+	if (cpfile(fd, stdout) < 0) {
+		perror(NULL);
+		exit(errno);
+	}
+
+	fclose(fd);
+}
+
 int main(int argc, char *argv[])
 {
 	char *home = getenv("HOME");
@@ -185,7 +205,7 @@ int main(int argc, char *argv[])
 		edit_tab();
 		break;
 	case LSTAB:
-		fprintf(stderr, "This operation is not implemented yet.\n");
+		list_tab();
 		break;
 	case RMTAB:
 		fprintf(stderr, "This operation is not implemented yet.\n");
