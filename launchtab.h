@@ -13,6 +13,7 @@ void lex_init(void);
 void *try_malloc(size_t size);
 void *try_realloc(void *ptr, size_t size);
 
+void handle_cronRule(void);
 void handle_id(void);
 void handle_comment(void);
 void handle_emptyLine(void);

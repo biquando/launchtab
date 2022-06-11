@@ -2,6 +2,7 @@
 #include "launchtab.h"
 %}
 
+cronRule       ^{space}?({calEntry}{space}){5}.+\n
 id             ^\[.+\]\n
 comment        ^{space}?#.*\n
 emptyLine      ^{space}?\n
@@ -25,6 +26,7 @@ calEntry (\*|([0-9]+))
 
 %%
 
+<INISC>{cronRule}      {handle_cronRule();                   }
 <INISC>{id}            {handle_id();             BEGIN COMSC;}
 <OPTSC>{id}            {handle_id();             BEGIN COMSC;}
 {comment}              {handle_comment();                    }

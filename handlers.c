@@ -49,16 +49,69 @@ void *try_realloc(void *ptr, size_t size)
 }
 
 
-void handle_id(void)
+static struct rule *new_rule(void)
 {
-	print_dbg("id: %s", yytext);
-	yytext = trim(yytext);
-
 	nrules++;
 	rules = try_realloc(rules, nrules * sizeof *rules);
 
 	struct rule *r = &rules[nrules - 1];
 	memset(r, 0, sizeof *r);
+	return r;
+}
+
+static char *add_calendar(struct rule *r)
+{
+	r->ncal++;
+	r->cal = try_realloc(r->cal, r->ncal * sizeof *r->cal);
+	struct calendar *c = &r->cal[r->ncal - 1];
+	memset(c, 0, sizeof *c);
+
+	int i = -1;
+	char *entry;
+	for (entry = strtok(yytext, " \t");
+	     entry && i < 4;
+	     entry = strtok(NULL, " \t")) {
+		i++;
+		if (entry[0] == '*')
+			continue;
+		c->ent[i] = try_malloc(strlen(entry) + 1);
+		strcpy(c->ent[i], entry);
+	}
+	return entry;
+}
+
+void handle_cronRule(void)
+{
+	print_dbg("cronRule: %s", yytext);
+	yytext = trim(yytext);
+
+	struct rule *r = new_rule();
+	char *cronid = "cron.rule";  /* TODO: support multiple cron rules */
+	r->id = try_malloc(strlen(cronid) + 1);
+	strcpy(r->id, cronid);
+
+	yytext = add_calendar(r);
+	if (yytext) {
+		/* The token should end with a newline */
+		for (int i = 0; yytext[i] != '\n'; i++) {
+			if (yytext[i] == '\0') {
+				yytext[i] = ' ';
+				break;
+			}
+		}
+
+		yytext = trim(yytext);
+		r->command = try_malloc(strlen(yytext) + 1);
+		strcpy(r->command, yytext);
+	}
+}
+
+void handle_id(void)
+{
+	print_dbg("id: %s", yytext);
+	yytext = trim(yytext);
+
+	struct rule *r = new_rule();
 
 	int len = strlen(yytext);
 	yytext[len - 1] = '\0'; /* remove trailing ] */
@@ -122,22 +175,7 @@ void handle_calendar(void)
 	print_dbg("calendar: %s", yytext);
 	yytext = trim(yytext);
 
-	struct rule *r = &rules[nrules - 1];
-	r->ncal++;
-	r->cal = try_realloc(r->cal, r->ncal * sizeof *r->cal);
-	struct calendar *c = &r->cal[r->ncal - 1];
-	memset(c, 0, sizeof *c);
-
-	int i = -1;
-	for (char *entry = strtok(yytext, " \t");
-	     entry;
-	     entry = strtok(NULL, " \t")) {
-		i++;
-		if (entry[0] == '*')
-			continue;
-		c->ent[i] = try_malloc(strlen(entry) + 1);
-		strcpy(c->ent[i], entry);
-	}
+	add_calendar(&rules[nrules - 1]);
 }
 
 void handle_envar(void)
