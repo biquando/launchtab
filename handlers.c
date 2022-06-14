@@ -28,6 +28,22 @@ static char *trim(char *str)
 	return str;
 }
 
+/* Append str2 to str1. str1 must be NULL or dynamically allocated.
+ * Returns the new string, reallocated from str1. */
+static char *str_append(char *str1, char *str2)
+{
+	if (str1) {
+		int l1 = strlen(str1);
+		int l2 = strlen(str2);
+		str1 = try_realloc(str1, l1 + l2 + 1);
+		strcpy(str1 + l1, str2);
+	} else {
+		str1 = try_realloc(str1, strlen(str2) + 1);
+		strcpy(str1, str2);
+	}
+	return str1;
+}
+
 void *try_malloc(size_t size)
 {
 	void *ptr = malloc(size);
@@ -91,15 +107,7 @@ void handle_command(void)
 	}
 
 	struct rule *r = &rules[nrules - 1];
-	if (r->command) {
-		int l1 = strlen(r->command);
-		int l2 = strlen(yytext);
-		r->command = try_realloc(r->command, l1 + l2 + 1);
-		strcpy(r->command + l1, yytext);
-	} else {
-		r->command = try_realloc(r->command, strlen(yytext) + 1);
-		strcpy(r->command, yytext);
-	}
+	r->command = str_append(r->command, yytext);
 }
 
 
@@ -204,16 +212,21 @@ void handle_stderr(void)
 }
 
 
-void handle_verbatim(void)
+void handle_verbatimStart(void)
 {
-	print_dbg("verbatim: %s", yytext);
-	yytext += sizeof "---";
+	print_dbg("verbatimStart: %s", yytext);
+}
 
+void handle_verbatimLine(void)
+{
+	print_dbg("verbatimLine: %s", yytext);
 	struct rule *r = &rules[nrules - 1];
-	int len = strlen(yytext) - sizeof "---";
-	yytext[len] = '\0';
-	r->verbatim = try_realloc(r->verbatim, len + 1);
-	strcpy(r->verbatim, yytext);
+	r->verbatim = str_append(r->verbatim, yytext);
+}
+
+void handle_verbatimEnd(void)
+{
+	print_dbg("verbatimEnd: %s", yytext);
 }
 
 void handle_unknownOpt(void)
