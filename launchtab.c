@@ -8,6 +8,7 @@
 #include "style.h"
 #include "tab.yy.h"
 #include "writer.h"
+#include "util.h"
 
 struct rule *rules;
 unsigned int nrules;

@@ -1,32 +1,13 @@
-#include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 #include "launchtab.h"
 #include "style.h"
-#include "writer.h"
+#include "util.h"
 
 extern char *yytext;
 extern int yylineno;
-
-/* Remove leading and trailing whitespace */
-static char *trim(char *str)
-{
-	if (!str)
-		return str;
-
-	while (isspace(*str)) str++;
-
-	if (*str) {
-		char *end = str + strlen(str) - 1;
-		while (end > str && isspace(*end)) end--;
-		end[1] = '\0';
-	}
-
-	return str;
-}
 
 /* Append str2 to str1. str1 must be NULL or dynamically allocated.
  * Returns the new string, reallocated from str1. */
@@ -42,26 +23,6 @@ static char *str_append(char *str1, char *str2)
 		strcpy(str1, str2);
 	}
 	return str1;
-}
-
-void *try_malloc(size_t size)
-{
-	void *ptr = malloc(size);
-	if (!ptr) {
-		perror(NULL);
-		exit(errno);
-	}
-	return ptr;
-}
-
-void *try_realloc(void *ptr, size_t size)
-{
-	ptr = realloc(ptr, size);
-	if (!ptr) {
-		perror(NULL);
-		exit(errno);
-	}
-	return ptr;
 }
 
 
@@ -152,8 +113,7 @@ void handle_envar(void)
 {
 	print_dbg("envar: %s", yytext);
 
-	char *label = yytext;
-	while (isspace(*label)) label++;
+	char *label = (char *) trim_leading(yytext);
 
 	char *value = label;
 	while (*value != '=') value++;

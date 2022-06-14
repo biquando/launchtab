@@ -1,5 +1,4 @@
 #include <errno.h>
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +9,7 @@
 #include "launchtab.h"
 #include "style.h"
 #include "writer.h"
+#include "util.h"
 
 const char *caltype[5] = {
 	"Minute",
@@ -24,68 +24,6 @@ const char *fdtype[3] = {
 	"Out",
 	"Err"
 };
-
-int mkdir_p(const char *path)
-{
-	char *buf = try_malloc(strlen(path) + 1);
-	strcpy(buf, path);
-
-	for (char *p = buf; *p != '\0'; p++) {
-		if (*p != '/' || p == buf)
-			continue;
-
-		*p = '\0';
-		if (mkdir(buf, 0755) < 0 && errno != EEXIST)
-			return -1;
-		*p = '/';
-	}
-	if (mkdir(buf, 0755) < 0 && errno != EEXIST)
-		return -1;
-
-	return 0;
-}
-
-size_t dirname(const char *path, char *output)
-{
-	size_t i;
-	if (!path)
-		return 0;
-	i = strlen(path);
-
-	/* strip trailing slashes */
-	while (i > 0 && path[i - 1] == '/')
-		i--;
-
-	/* strip last entry */
-	while (i > 0 && path[i - 1] != '/')
-		i--;
-
-	/* strip trailing slashes */
-	while (i > 0 && path[i - 1] == '/')
-		i--;
-
-	if (output) {
-		strncpy(output, path, i);
-		output[i] = '\0';
-	}
-	return i;
-}
-
-int cpfile(FILE *src, FILE *dst)
-{
-	char buf[4096];
-	rewind(src);
-	rewind(dst);
-
-	while (!feof(src)) {
-		size_t nbytes = fread(buf, 1, sizeof buf, src);
-		if (nbytes > 0 && fwrite(buf, 1, nbytes, dst) != nbytes) {
-			return -1;
-		}
-	}
-
-	return 0;
-}
 
 int edit_file(const char *file)
 {
@@ -250,15 +188,4 @@ void write_plist(char *launchpath, struct rule r)
 	fclose(f);
 
 	fprintf(stderr, FBOLD"launchtab:"FRESET" Wrote rule: %s\n", r.id);
-}
-
-void print_dbg(char *format, ...)
-{
-	if (!debug)
-		return;
-
-	va_list ap;
-	va_start(ap, format);
-	vfprintf(stderr, format, ap);
-	va_end(ap);
 }

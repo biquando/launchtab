@@ -4,13 +4,7 @@
 #include <stdio.h>
 #include "launchtab.h"
 
-int mkdir_p(const char *path);
-size_t dirname(const char *path, char *output);
-int cpfile(FILE *src, FILE *dst);
-
 int edit_file(const char *file);
 void write_plist(char *launchpath, struct rule r);
-
-void print_dbg(char *format, ...);
 
 #endif
