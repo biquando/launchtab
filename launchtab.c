@@ -12,6 +12,7 @@
 
 struct rule *rules;
 unsigned int nrules;
+unsigned int ncronrules;
 int debug = 0;
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
@@ -27,6 +28,7 @@ static void install_tab()
 	/* Initialize rules */
 	rules = NULL;
 	nrules = 0;
+	ncronrules = 0;
 
 	yyin = fd;
 	lex_init();

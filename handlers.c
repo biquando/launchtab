@@ -86,9 +86,8 @@ void handle_cronRule(void)
 	yytext = trim(yytext);
 
 	struct rule *r = new_rule();
-	char *cronid = "cron.rule";  /* TODO: support multiple cron rules */
-	r->id = try_malloc(strlen(cronid) + 1);
-	strcpy(r->id, cronid);
+	r->id = try_malloc(sizeof "cron.rule." + ncronrules/10);
+	sprintf(r->id, "cron.rule.%u", ncronrules++);
 
 	yytext = add_calendar(r);
 	if (yytext) {

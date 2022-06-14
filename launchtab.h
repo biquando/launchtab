@@ -54,6 +54,7 @@ struct rule {
 
 extern struct rule *rules;
 extern unsigned int nrules;
+extern unsigned int ncronrules;
 extern int debug;
 
 #endif
