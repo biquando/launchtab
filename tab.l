@@ -3,21 +3,21 @@
 %}
 
 cronRule       ^{space}?({calEntry}{space}){5}.+\n
-id             ^\[[^\n]+\]\n
-comment        ^{space}?#[^\n]*\n
+id             ^\[.+\]\n
+comment        ^{space}?#.*\n
 emptyLine      ^{space}?\n
-commandMulti   ^{space}?[^\n]*\\\n
-command        ^{space}?[^\n]*\n
+commandMulti   ^{space}?.*\\\n
+command        ^{space}?.*\n
 interval       ^{space}?Interval{space}[0-9]+\n
 calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}\n
-envar          ^{space}?[a-zA-Z0-9_]+=[^\n]*\n
-stdin          ^{space}?\<[^\n]+\n
-stdout         ^{space}?\>[^\n]+\n
-stderr         ^{space}?2\>[^\n]+\n
+envar          ^{space}?[^\n \t=]+{space}?={space}?.*\n
+stdin          ^{space}?\<.+\n
+stdout         ^{space}?\>.+\n
+stderr         ^{space}?2\>.+\n
 verbatimStart  ^---\n
 verbatimEnd    ^---\n
-verbatimLine   ^[^\n]*\n
-unknownOpt     ^{space}?[^\n]*\n
+verbatimLine   ^.*\n
+unknownOpt     ^{space}?.*\n
 
 space [ \t]+
 calEntry (\*|([0-9]+))

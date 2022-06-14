@@ -40,6 +40,20 @@ static char *add_calendar(struct rule *r)
 	return entry;
 }
 
+static char *parse_value(char *value)
+{
+	value = trim(value);
+	int len = strlen(value);
+
+	if (len > 1 && (value[0] == '\'' || value[len-1] == '\"')
+			&& value[0] == value[len-1]) {
+		value[len-1] = '\0';
+		value++;
+	}
+
+	return value;
+}
+
 
 void handle_cronRule(void)
 {
@@ -134,16 +148,17 @@ void handle_envar(void)
 {
 	print_dbg("envar: %s", yytext);
 
-	char *label = (char *) trim_leading(yytext);
-
-	char *value = label;
+	char *label = yytext;
+	char *value = yytext;
 	while (*value != '=') value++;
 	*value = '\0';
 	value++;
 
+	label = trim(label);
+	value = parse_value(value);
+
 	int labellen = strlen(label);
 	int valuelen = strlen(value);
-	value[valuelen - 1] = '\0';
 
 	struct rule *r = &rules[nrules - 1];
 	r->nvar++;

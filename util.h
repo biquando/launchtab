@@ -6,7 +6,7 @@
 void *try_malloc(size_t size);
 void *try_realloc(void *ptr, size_t size);
 
-const char *trim_leading(const char *str);
+char *trim_leading(char *str);
 char *trim_trailing(char *str);
 char *trim(char *str);
 char *str_append(char *str1, char *str2);

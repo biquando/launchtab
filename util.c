@@ -31,7 +31,7 @@ void *try_realloc(void *ptr, size_t size)
 }
 
 
-const char *trim_leading(const char *str)
+char *trim_leading(char *str)
 {
 	if (str)
 		while (isspace(*str)) str++;
@@ -50,7 +50,7 @@ char *trim_trailing(char *str)
 
 char *trim(char *str)
 {
-	return trim_trailing((char *) trim_leading(str));
+	return trim_trailing(trim_leading(str));
 }
 
 /* Append str2 to str1. str1 must be NULL or dynamically allocated.
