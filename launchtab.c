@@ -12,6 +12,7 @@
 
 struct rule *rules;
 unsigned int nrules;
+unsigned int ncronrules;
 int debug;
 int quiet = 0;
 
@@ -29,6 +30,7 @@ static void install_tab()
 	/* Initialize rules */
 	rules = NULL;
 	nrules = 0;
+	ncronrules = 0;
 
 	yyin = fd;
 	lex_init();

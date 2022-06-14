@@ -10,6 +10,7 @@
 
 void lex_init(void);
 
+void handle_cronRule(void);
 void handle_id(void);
 void handle_comment(void);
 void handle_emptyLine(void);
@@ -52,6 +53,7 @@ struct rule {
 
 extern struct rule *rules;
 extern unsigned int nrules;
+extern unsigned int ncronrules;
 extern int debug;
 extern int quiet;
 
