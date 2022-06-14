@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define YY_HEADER_EXPORT_START_CONDITIONS
 #include "launchtab.h"
 #include "options.h"
 #include "style.h"
@@ -13,7 +12,8 @@
 struct rule *rules;
 unsigned int nrules;
 unsigned int ncronrules;
-int debug = 0;
+int debug;
+
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 

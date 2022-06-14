@@ -27,7 +27,9 @@ void handle_stdin(void);
 void handle_stdout(void);
 void handle_stderr(void);
 
-void handle_verbatim(void);
+void handle_verbatimStart(void);
+void handle_verbatimLine(void);
+void handle_verbatimEnd(void);
 void handle_unknownOpt(void);
 
 void handle_invalid(void);

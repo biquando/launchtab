@@ -1,8 +1,8 @@
-CC = gcc
-LD = gcc
+CC = clang
+LD = clang
 LEX = flex
 
-CFLAGS =
+CFLAGS = -Wall
 LDFLAGS =
 
 SRC = $(wildcard *.c)
@@ -15,6 +15,9 @@ all: bin/launchtab
 bin/launchtab: tab.yy.o $(OBJ)
 	mkdir -p bin
 	$(LD) -o $@ $(LDFLAGS) $^
+
+tab.yy.o: tab.yy.c
+	$(CC) -o $@ -c $<
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c $<
