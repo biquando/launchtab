@@ -6,11 +6,19 @@
 #include "options.h"
 #include "util.h"
 
-#define OPTSTR "edlr"
+#define OPTSTR "dehlr"
 
 static void usage(int err)
 {
-	fprintf(stderr, "usage: TODO\n");
+	fprintf(stderr,
+		"usage:  launchtab [ -d ] [ file ]\n"
+		"        launchtab [ -d ] { -e | -h | -l | -r }\n"
+		"        -d, --debug      show debug messages when installing\n"
+		"        -e, --edit       edit user's launchtab\n"
+		"        -h, --help       show this message\n"
+		"        -l, --list       list user's launchtab\n"
+		"        -r, --remove     remove user's launchtab\n"
+		);
 	exit(err);
 }
 
@@ -29,8 +37,9 @@ struct taboptions parseopts(int argc, char *argv[])
 	int c;
 
 	static struct option longopts[] = {
-		{ "edit",   no_argument, NULL, 'e' },
 		{ "debug",  no_argument, NULL, 'd' },
+		{ "edit",   no_argument, NULL, 'e' },
+		{ "help",   no_argument, NULL, 'h' },
 		{ "list",   no_argument, NULL, 'l' },
 		{ "remove", no_argument, NULL, 'r' },
 		{ NULL,     0,           NULL, 0 }
@@ -38,11 +47,14 @@ struct taboptions parseopts(int argc, char *argv[])
 
 	while ((c = getopt_long(argc, argv, OPTSTR, longopts, NULL)) != -1) {
 		switch (c) {
+		case 'd':
+			opts.debug = 1;
+			break;
 		case 'e':
 			setop(&opts, EDTAB);
 			break;
-		case 'd':
-			opts.debug = 1;
+		case 'h':
+			usage(0);
 			break;
 		case 'l':
 			setop(&opts, LSTAB);
