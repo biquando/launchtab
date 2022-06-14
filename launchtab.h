@@ -7,6 +7,7 @@
 #define TAB    "launch.tab"
 #define TABPATH CONFIG TABDIR TAB
 #define LAUNCHPATH "Library/LaunchAgents"
+#define DEFAULT_SHELL "/bin/sh"
 
 void lex_init(void);
 

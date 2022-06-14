@@ -93,6 +93,13 @@ void write_plist(char *launchpath, struct rule r)
 		return;
 	}
 
+	/* Look for $SHELL environment variable */
+	char *shell = DEFAULT_SHELL;
+	for (int i = 0; i < r.nvar; i++) {
+		if (strcmp("SHELL", r.varlabels[i]) == 0)
+			shell = r.varvalues[i];
+	}
+
 	fprintf(f,
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"\n"
@@ -104,10 +111,10 @@ void write_plist(char *launchpath, struct rule r)
 	fprintf(f,
 		"    <key>ProgramArguments</key>\n"
 		"    <array>\n"
-		"        <string>/bin/bash</string>\n"
+		"        <string>%s</string>\n"
 		"        <string>-c</string>\n"
 		"        <string>exec %s</string>\n"
-		"    </array>\n", r.command);
+		"    </array>\n", shell, r.command);
 
 	/* Interval */
 	if (r.interval) {
