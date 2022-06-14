@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #include "options.h"
-#include "style.h"
+#include "util.h"
 
 #define OPTSTR "edlr"
 
@@ -17,7 +17,7 @@ static void usage(int err)
 static void setop(struct taboptions *opts, enum tabop op)
 {
 	if (opts->op) {
-		fprintf(stderr, LTERR("only one operation permitted\n"));
+		print_err("only one operation permitted\n");
 		usage(EINVAL);
 	}
 	opts->op = op;
@@ -58,13 +58,12 @@ struct taboptions parseopts(int argc, char *argv[])
 	opts.argv = argv + optind;
 
 	if (opts.op && opts.argc > 0) {
-		fprintf(stderr,
-			LTERR("no arguments permitted after this option\n"));
+		print_err("no arguments permitted after this option\n");
 		usage(EINVAL);
 	}
 
 	if (opts.argc > 1) {
-		fprintf(stderr, LTERR("only one file argument allowed\n"));
+		print_err("only one file argument allowed\n");
 		usage(EINVAL);
 	}
 
