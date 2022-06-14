@@ -55,7 +55,7 @@ int edit_file(const char *file)
 		exit(errno);
 	}
 	if (!WIFEXITED(status) || WEXITSTATUS(status)) {
-		fprintf(stderr, LTERR("%s exited abnormally\n"), editor);
+		print_warn("%s exited abnormally\n", editor);
 	}
 
 	if (stat(file, &statbuf) == 0)
@@ -72,9 +72,8 @@ int edit_file(const char *file)
 void write_plist(char *launchpath, struct rule r)
 {
 	if (!r.id || !r.command) {
-		fprintf(stderr, LTWARN("rule is missing a command: "
-					"%s\n"), r.id);
-		fprintf(stderr, FBOLD"launchtab:"FRESET"   skipping rule...\n");
+		print_warn("rule is missing a command: %s\n", r.id);
+		print_info("  skipping rule...\n");
 		return;
 	}
 
@@ -89,9 +88,8 @@ void write_plist(char *launchpath, struct rule r)
 
 	FILE *f = fopen(path, "w");
 	if (!f) {
-		fprintf(stderr, LTWARN("couldn't open file %s\n"),
-				path);
-		fprintf(stderr, FBOLD"launchtab:"FRESET"   skipping rule...\n");
+		print_warn("couldn't open file %s\n", path);
+		print_info("  skipping rule...\n");
 		return;
 	}
 
@@ -187,5 +185,5 @@ void write_plist(char *launchpath, struct rule r)
 	free(path);
 	fclose(f);
 
-	fprintf(stderr, FBOLD"launchtab:"FRESET" Wrote rule: %s\n", r.id);
+	print_info("Wrote rule: %s\n", r.id);
 }

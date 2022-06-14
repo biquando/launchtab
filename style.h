@@ -12,9 +12,11 @@
 #define FCYAN    "\x1b[36m"
 #define FRESET   "\x1b[0m"
 
-#define LTERR(msg) FBOLD "launchtab: " FRED "Error: " FRESET msg
-#define LTERRL(msg) LTERR(FBOLD "(line %d) " FRESET) msg
 #define LTWARN(msg) FBOLD "launchtab: " FYELLOW "Warning: " FRESET msg
 #define LTWARNL(msg) LTWARN(FBOLD "(line %d) " FRESET) msg
+#define LTERR(msg) FBOLD "launchtab: " FRED "Error: " FRESET msg
+#define LTERRL(msg) LTERR(FBOLD "(line %d) " FRESET) msg
+#define LTINFO(msg) FBOLD "launchtab: " FRESET msg
+#define LTINFOL(msg) LTINFO(FBOLD "(line %d) " FRESET) msg
 
 #endif

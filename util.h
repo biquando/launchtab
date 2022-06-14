@@ -16,5 +16,11 @@ size_t dirname(const char *path, char *output);
 int cpfile(FILE *src, FILE *dst);
 
 void print_dbg(char *format, ...);
+void print_warn(char *format, ...);
+void print_warnl(char *format, unsigned lineno, ...);
+void print_err(char *format, ...);
+void print_errl(char *format, unsigned lineno, ...);
+void print_info(char *format, ...);
+void print_infol(char *format, unsigned lineno, ...);
 
 #endif

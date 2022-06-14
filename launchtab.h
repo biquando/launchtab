@@ -53,5 +53,6 @@ struct rule {
 extern struct rule *rules;
 extern unsigned int nrules;
 extern int debug;
+extern int quiet;
 
 #endif

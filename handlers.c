@@ -174,10 +174,10 @@ void handle_verbatimEnd(void)
 
 void handle_unknownOpt(void)
 {
-	fprintf(stderr, LTWARNL("unknown option: %s"), yylineno, yytext);
+	print_warnl("unknown option: %s", yylineno - 1, yytext);
 }
 
 void handle_invalid(void)
 {
-	fprintf(stderr, LTERRL("invalid token\n"), yylineno);
+	print_errl("invalid token\n", yylineno - 1);
 }

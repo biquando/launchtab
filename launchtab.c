@@ -13,6 +13,8 @@
 struct rule *rules;
 unsigned int nrules;
 int debug;
+int quiet = 0;
+
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
@@ -119,8 +121,7 @@ static void import_tab(FILE *fd)
 static void edit_tab()
 {
 	if (!edit_file(tabpath)) {
-		fprintf(stderr, FBOLD"launchtab:"FRESET
-				" no changes made to "TAB"\n");
+		print_info(" no changes made to "TAB"\n");
 		return;
 	}
 	install_tab();
@@ -131,8 +132,7 @@ static void list_tab()
 	FILE *fd = fopen(tabpath, "r");
 	if (!fd && errno == ENOENT) {
 		if (errno == ENOENT)
-			fprintf(stderr,
-				LTERR("user does not have a launchtab\n"));
+			print_err("user does not have a launchtab\n");
 		else
 			perror(NULL);
 		exit(errno);
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 	char *home = getenv("HOME");
 
 	if (!home) {
-		fprintf(stderr, LTERR("missing $HOME variable.\n"));
+		print_err("missing $HOME variable.\n");
 		exit(ENOENT);
 	}
 
@@ -176,14 +176,12 @@ int main(int argc, char *argv[])
 	char tmpc = tabpath[tabdirlen];
 	tabpath[tabdirlen] = '\0';
 	if (mkdir_p(launchpath) < 0) {
-		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
-				launchpath);
+		print_err("couldn't create directory: %s\n", launchpath);
 		perror(NULL);
 		exit(errno);
 	}
 	if (mkdir_p(tabpath) < 0) {
-		fprintf(stderr, LTERR("couldn't create directory: %s\n"),
-				tabpath);
+		print_err("couldn't create directory: %s\n", tabpath);
 		perror(NULL);
 		exit(errno);
 	}
@@ -200,7 +198,7 @@ int main(int argc, char *argv[])
 		if (argc > 0) {
 			fd = fopen(argv[0], "r");
 			if (!fd) {
-				fprintf(stderr, LTERR("%s: "), argv[0]);
+				print_err("%s: ", argv[0]);
 				perror(NULL);
 				exit(errno);
 			}

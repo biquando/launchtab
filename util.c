@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 
 #include "launchtab.h"
+#include "style.h"
 #include "util.h"
 
 void *try_malloc(size_t size)
@@ -139,6 +140,78 @@ void print_dbg(char *format, ...)
 
 	va_list ap;
 	va_start(ap, format);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_warn(char *format, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, format);
+	fprintf(stderr, LTWARN(""));
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_warnl(char *format, unsigned lineno, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, lineno);
+	fprintf(stderr, LTWARNL(""), lineno);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_err(char *format, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, format);
+	fprintf(stderr, LTERR(""));
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_errl(char *format, unsigned lineno, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, lineno);
+	fprintf(stderr, LTERRL(""), lineno);
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_info(char *format, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, format);
+	fprintf(stderr, LTINFO(""));
+	vfprintf(stderr, format, ap);
+	va_end(ap);
+}
+
+void print_infol(char *format, unsigned lineno, ...)
+{
+	if (quiet)
+		return;
+
+	va_list ap;
+	va_start(ap, lineno);
+	fprintf(stderr, LTINFOL(""), lineno);
 	vfprintf(stderr, format, ap);
 	va_end(ap);
 }
