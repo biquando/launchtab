@@ -9,23 +9,6 @@
 extern char *yytext;
 extern int yylineno;
 
-/* Append str2 to str1. str1 must be NULL or dynamically allocated.
- * Returns the new string, reallocated from str1. */
-static char *str_append(char *str1, char *str2)
-{
-	if (str1) {
-		int l1 = strlen(str1);
-		int l2 = strlen(str2);
-		str1 = try_realloc(str1, l1 + l2 + 1);
-		strcpy(str1 + l1, str2);
-	} else {
-		str1 = try_realloc(str1, strlen(str2) + 1);
-		strcpy(str1, str2);
-	}
-	return str1;
-}
-
-
 void handle_id(void)
 {
 	print_dbg("id: %s", yytext);
