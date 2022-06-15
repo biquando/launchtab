@@ -95,7 +95,7 @@ void write_plist(char *launchpath, struct rule r)
 
 	/* Look for $SHELL environment variable */
 	char *shell = DEFAULT_SHELL;
-	for (int i = 0; i < r.nvar; i++) {
+	for (int i = 0; i < r.nvars; i++) {
 		if (strcmp("SHELL", r.varlabels[i]) == 0)
 			shell = r.varvalues[i];
 	}
@@ -124,7 +124,7 @@ void write_plist(char *launchpath, struct rule r)
 	}
 
 	/* Single calendar */
-	if (r.ncal == 1) {
+	if (r.ncals == 1) {
 		fprintf(f,
 			"    <key>StartCalendarInterval</key>\n"
 			"    <dict>\n");
@@ -140,11 +140,11 @@ void write_plist(char *launchpath, struct rule r)
 	}
 
 	/* Multiple calendars */
-	if (r.ncal > 1) {
+	if (r.ncals > 1) {
 		fprintf(f,
 			"    <key>StartCalendarInterval</key>\n"
 			"    <array>\n");
-		for (int c = 0; c < r.ncal; c++) {
+		for (int c = 0; c < r.ncals; c++) {
 			fprintf(f, "        <dict>\n");
 			for (int e = 0; e < 5; e++) {
 				if (!r.cal[c].ent[e])
@@ -160,17 +160,17 @@ void write_plist(char *launchpath, struct rule r)
 	}
 
 	/* Environment variables */
-	if (r.nvar > 0)
+	if (r.nvars > 0)
 		fprintf(f,
 			"    <key>EnvironmentVariables</key>\n"
 			"    <dict>\n");
-	for (int v = 0; v < r.nvar; v++) {
+	for (int v = 0; v < r.nvars; v++) {
 		fprintf(f,
 			"        <key>%s</key>\n"
 			"        <string>%s</string>\n",
 			r.varlabels[v], r.varvalues[v]);
 	}
-	if (r.nvar > 0)
+	if (r.nvars > 0)
 		fprintf(f, "    </dict>\n");
 
 	/* File descriptors */

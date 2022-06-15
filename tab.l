@@ -10,7 +10,7 @@ commandMulti   ^{space}?.*\\\n
 command        ^{space}?.*\n
 interval       ^{space}?Interval{space}[0-9]+\n
 calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}\n
-envar          ^{space}?[^\n \t=]+{space}?={space}?.*\n
+envar          ^{space}?[^ \t=]+{space}?={space}?.*\n
 stdin          ^{space}?\<.+\n
 stdout         ^{space}?\>.+\n
 stderr         ^{space}?2\>.+\n
@@ -30,6 +30,7 @@ calEntry (\*|([0-9]+))
 %%
 
 <INISC>{cronRule}      {handle_cronRule();                   }
+<INISC>{envar}         {handle_globEnvar();                  }
 <INISC>{id}            {handle_id();             BEGIN COMSC;}
 <OPTSC>{id}            {handle_id();             BEGIN COMSC;}
 {comment}              {handle_comment();                    }

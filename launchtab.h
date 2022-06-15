@@ -12,6 +12,7 @@
 void lex_init(void);
 
 void handle_cronRule(void);
+void handle_globEnvar(void);
 void handle_id(void);
 void handle_comment(void);
 void handle_emptyLine(void);
@@ -44,10 +45,10 @@ struct rule {
 	char *command;
 	char *interval;
 	struct calendar *cal;
-	unsigned int ncal;
+	unsigned int ncals;
 	char **varlabels;
 	char **varvalues;
-	unsigned int nvar;
+	unsigned int nvars;
 	char *fd[3];
 	char *verbatim;
 };
@@ -55,6 +56,11 @@ struct rule {
 extern struct rule *rules;
 extern unsigned int nrules;
 extern unsigned int ncronrules;
+
+extern char **varlabels_glob;
+extern char **varvalues_glob;
+extern unsigned int nvars_glob;
+
 extern int debug;
 extern int quiet;
 

@@ -8,7 +8,8 @@ Interval 3600
 30 5 * * 1
 
 # set environment variables
-FILE=/tmp/launchtab-example
+SHELL = /bin/bash
+FILE  = /tmp/launchtab-example
 
 # redirect stdin, stdout, and stderr
 <  /etc/passwd

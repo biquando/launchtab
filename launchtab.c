@@ -13,6 +13,9 @@
 struct rule *rules;
 unsigned int nrules;
 unsigned int ncronrules;
+char **varlabels_glob;
+char **varvalues_glob;
+unsigned int nvars_glob;
 int debug;
 int quiet = 0;
 
@@ -32,6 +35,11 @@ static void install_tab()
 	nrules = 0;
 	ncronrules = 0;
 
+	/* Initialize global envars */
+	varlabels_glob = NULL;
+	varvalues_glob = NULL;
+	nvars_glob = 0;
+
 	yyin = fd;
 	lex_init();
 	yylex();
@@ -45,14 +53,14 @@ static void install_tab()
 			fprintf(stderr, "%s\n", r.command);
 			if (r.interval)
 				fprintf(stderr, "Interval: %s\n", r.interval);
-			for (int c = 0; c < r.ncal; c++) {
+			for (int c = 0; c < r.ncals; c++) {
 				fprintf(stderr, "Calendar:");
 				for (int e = 0; e < 5; e++) {
 					fprintf(stderr, " %s", r.cal[c].ent[e]);
 				}
 				fprintf(stderr, "\n");
 			}
-			for (int v = 0; v < r.nvar; v++) {
+			for (int v = 0; v < r.nvars; v++) {
 				fprintf(stderr, "Variable: %s = %s\n",
 						r.varlabels[v], r.varvalues[v]);
 			}
@@ -74,7 +82,7 @@ static void install_tab()
 		free(r.id);
 		free(r.command);
 		free(r.cal);
-		for (int v = 0; v < r.nvar; v++) {
+		for (int v = 0; v < r.nvars; v++) {
 			free(r.varlabels[v]);
 			free(r.varvalues[v]);
 		}
@@ -86,6 +94,14 @@ static void install_tab()
 		free(r.verbatim);
 	}
 	free(rules);
+
+	/* Free global envars */
+	for (int i = 0; i < nvars_glob; i++) {
+		free(varlabels_glob[i]);
+		free(varvalues_glob[i]);
+	}
+	free(varlabels_glob);
+	free(varvalues_glob);
 
 	fclose(fd);
 

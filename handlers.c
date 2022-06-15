@@ -21,9 +21,9 @@ static struct rule *new_rule(void)
 
 static char *add_calendar(struct rule *r)
 {
-	r->ncal++;
-	r->cal = try_realloc(r->cal, r->ncal * sizeof *r->cal);
-	struct calendar *c = &r->cal[r->ncal - 1];
+	r->ncals++;
+	r->cal = try_realloc(r->cal, r->ncals * sizeof *r->cal);
+	struct calendar *c = &r->cal[r->ncals - 1];
 	memset(c, 0, sizeof *c);
 
 	int i = -1;
@@ -54,6 +54,31 @@ static char *parse_value(char *value)
 	return value;
 }
 
+static void parse_envar(char *text, char ***labs_p, char ***vals_p,
+		unsigned int *nvar_p)
+{
+	char *label = text;
+	char *value = text;
+	while (*value != '=') value++;
+	*value = '\0';
+	value++;
+
+	label = trim(label);
+	value = parse_value(value);
+
+	int label_len = strlen(label);
+	int value_len = strlen(value);
+
+	(*nvar_p)++;
+	*labs_p = try_realloc(*labs_p, *nvar_p * sizeof **labs_p);
+	*vals_p = try_realloc(*vals_p, *nvar_p * sizeof **vals_p);
+
+	(*labs_p)[*nvar_p - 1] = try_malloc(label_len);
+	(*vals_p)[*nvar_p - 1] = try_malloc(value_len);
+	strcpy((*labs_p)[*nvar_p - 1], label);
+	strcpy((*vals_p)[*nvar_p - 1], value);
+}
+
 
 void handle_cronRule(void)
 {
@@ -78,6 +103,12 @@ void handle_cronRule(void)
 		r->command = try_malloc(strlen(yytext) + 1);
 		strcpy(r->command, yytext);
 	}
+}
+
+void handle_globEnvar(void)
+{
+	print_dbg("globEnvar: %s", yytext);
+	parse_envar(yytext, &varlabels_glob, &varvalues_glob, &nvars_glob);
 }
 
 void handle_id(void)
@@ -147,28 +178,8 @@ void handle_calendar(void)
 void handle_envar(void)
 {
 	print_dbg("envar: %s", yytext);
-
-	char *label = yytext;
-	char *value = yytext;
-	while (*value != '=') value++;
-	*value = '\0';
-	value++;
-
-	label = trim(label);
-	value = parse_value(value);
-
-	int labellen = strlen(label);
-	int valuelen = strlen(value);
-
 	struct rule *r = &rules[nrules - 1];
-	r->nvar++;
-	r->varlabels = try_realloc(r->varlabels,r->nvar * sizeof *r->varlabels);
-	r->varvalues = try_realloc(r->varvalues,r->nvar * sizeof *r->varvalues);
-
-	r->varlabels[r->nvar-1] = try_malloc(labellen);
-	r->varvalues[r->nvar-1] = try_malloc(valuelen);
-	strcpy(r->varlabels[r->nvar-1], label);
-	strcpy(r->varvalues[r->nvar-1], value);
+	parse_envar(yytext, &r->varlabels, &r->varvalues, &r->nvars);
 }
 
 void handle_stdin(void)
