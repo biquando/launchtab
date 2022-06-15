@@ -69,6 +69,16 @@ char *str_append(char *str1, char *str2)
 	return str1;
 }
 
+/* Returns the value associated with label, or NULL if none. */
+char *find_value(char *label, char **labels, char **values, unsigned int n)
+{
+	for (int i = 0; i < n; i++) {
+		if (strcmp(label, labels[i]) == 0)
+			return (char *) values[i];
+	}
+	return NULL;
+}
+
 
 int mkdir_p(const char *path)
 {

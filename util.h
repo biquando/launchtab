@@ -10,6 +10,7 @@ char *trim_leading(char *str);
 char *trim_trailing(char *str);
 char *trim(char *str);
 char *str_append(char *str1, char *str2);
+char *find_value(char *label, char **labels, char **values, unsigned int n);
 
 int mkdir_p(const char *path);
 size_t dirname(const char *path, char *output);

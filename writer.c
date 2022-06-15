@@ -160,11 +160,24 @@ void write_plist(char *launchpath, struct rule r)
 	}
 
 	/* Environment variables */
-	if (r.nvars > 0)
+	if (r.nvars > 0) {
 		fprintf(f,
 			"    <key>EnvironmentVariables</key>\n"
 			"    <dict>\n");
-	for (int v = 0; v < r.nvars; v++) {
+	}
+	for (int v = 0; v < nvars_glob; v++) { /* Global envars */
+		/* Only add global variables if they aren't locally set */
+		if (!find_value(varlabels_glob[v],
+		               r.varlabels,
+		               r.varvalues,
+		               r.nvars)) {
+			fprintf(f,
+				"        <key>%s</key>\n"
+				"        <string>%s</string>\n",
+				varlabels_glob[v], varvalues_glob[v]);
+		}
+	}
+	for (int v = 0; v < r.nvars; v++) { /* Local envars */
 		fprintf(f,
 			"        <key>%s</key>\n"
 			"        <string>%s</string>\n",

@@ -139,7 +139,7 @@ static void import_tab(FILE *fd)
 static void edit_tab()
 {
 	if (!edit_file(tabpath)) {
-		print_info(" no changes made to "TAB"\n");
+		print_info("no changes made to "TAB"\n");
 		return;
 	}
 	install_tab();
