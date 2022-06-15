@@ -32,7 +32,7 @@ static char *add_calendar(struct rule *r)
 	     entry && i < 4;
 	     entry = strtok(NULL, " \t")) {
 		i++;
-		if (entry[0] == '*')
+		if (strlen(entry) == 1 && entry[0] == '*')
 			continue;
 		c->ent[i] = try_malloc(strlen(entry) + 1);
 		strcpy(c->ent[i], entry);

@@ -6,8 +6,9 @@ echo "It is $(date)!" >>"$FILE"
 # run every hour
 Interval 3600
 
-# run at 5:30 on mondays
-30 5 * * 1
+# set crontab-style calendar intervals
+0    5 * * 1-5
+0,30 4 * * */3
 
 # set environment variables
 FILE = /tmp/launchtab-example

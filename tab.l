@@ -21,7 +21,7 @@ unknownOpt     ^{spc}?{spc}?.*{eol}
 
 spc [ \t]+
 eol {spc}?\n
-calEntry \*|([0-9]+)
+calEntry [*0-9\-,/]+
 specialCal @(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)
 
 %s INISC
@@ -40,6 +40,7 @@ specialCal @(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)
 <COMSC>{commandMulti}  {handle_commandMulti();               }
 <COMSC>{command}       {handle_command();        BEGIN OPTSC;}
 
+<OPTSC>{verbatimStart} {handle_verbatimStart();  BEGIN VERSC;}
 <OPTSC>{interval}      {handle_interval();                   }
 <OPTSC>{calendar}      {handle_calendar();                   }
 <OPTSC>{envar}         {handle_envar();                      }
@@ -47,7 +48,6 @@ specialCal @(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)
 <OPTSC>{stdout}        {handle_stdout();                     }
 <OPTSC>{stderr}        {handle_stderr();                     }
 
-<OPTSC>{verbatimStart} {handle_verbatimStart();  BEGIN VERSC;}
 <VERSC>{verbatimEnd}   {handle_verbatimEnd();    BEGIN OPTSC;}
 <VERSC>{verbatimLine}  {handle_verbatimLine();               }
 <OPTSC>{unknownOpt}    {handle_unknownOpt();                 }
