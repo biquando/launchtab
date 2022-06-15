@@ -19,8 +19,30 @@ static struct rule *new_rule(void)
 	return r;
 }
 
-static char *add_calendar(struct rule *r)
+#define SPEC_CAL(special, normal) \
+	} else if (strncmp(text, special, sizeof special - 1) == 0) { \
+		char *tmp = try_malloc(sizeof normal); \
+		strcpy(tmp, normal); \
+		add_calendar(tmp, r); \
+		free(tmp); \
+		return text + sizeof special - 1
+static char *add_calendar(char *text, struct rule *r)
 {
+	/* Check special calendar rules */
+	if (text[0] == '@') {
+		if (strncmp(text, "@reboot", 7) == 0) {
+			return text + 7; /* @reboot is not implemented */
+
+		SPEC_CAL("@yearly",   "0 0 1 1 *");
+		SPEC_CAL("@annually", "@yearly"  );
+		SPEC_CAL("@monthly",  "0 0 1 * *");
+		SPEC_CAL("@weekly",   "0 0 * * 0");
+		SPEC_CAL("@daily",    "0 0 * * *");
+		SPEC_CAL("@midnight", "@daily"   );
+		SPEC_CAL("@hourly",   "0 * * * *");
+		}
+	}
+
 	r->ncals++;
 	r->cal = try_realloc(r->cal, r->ncals * sizeof *r->cal);
 	struct calendar *c = &r->cal[r->ncals - 1];
@@ -28,7 +50,7 @@ static char *add_calendar(struct rule *r)
 
 	int i = -1;
 	char *entry;
-	for (entry = strtok(yytext, " \t");
+	for (entry = strtok(text, " \t");
 	     entry && i < 4;
 	     entry = strtok(NULL, " \t")) {
 		i++;
@@ -89,7 +111,7 @@ void handle_cronRule(void)
 	r->id = try_malloc(sizeof "cron.rule." + ncronrules/10);
 	sprintf(r->id, "cron.rule.%u", ncronrules++);
 
-	yytext = add_calendar(r);
+	yytext = add_calendar(yytext, r);
 	if (yytext) {
 		/* The token should end with a newline */
 		for (int i = 0; yytext[i] != '\n'; i++) {
@@ -172,7 +194,7 @@ void handle_calendar(void)
 	print_dbg("calendar: %s", yytext);
 	yytext = trim(yytext);
 
-	add_calendar(&rules[nrules - 1]);
+	add_calendar(yytext, &rules[nrules - 1]);
 }
 
 void handle_envar(void)

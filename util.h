@@ -5,6 +5,7 @@
 
 void *try_malloc(size_t size);
 void *try_realloc(void *ptr, size_t size);
+extern void free(void *);
 
 char *trim_leading(char *str);
 char *trim_trailing(char *str);
