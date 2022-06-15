@@ -2,9 +2,9 @@
 #include "launchtab.h"
 %}
 
+comment        ^{space}?#.*\n
 cronRule       ^{space}?({calEntry}{space}){5}.+\n
 id             ^\[.+\]\n
-comment        ^{space}?#.*\n
 emptyLine      ^{space}?\n
 commandMulti   ^{space}?.*\\\n
 command        ^{space}?.*\n
@@ -29,11 +29,11 @@ calEntry (\*|([0-9]+))
 
 %%
 
+{comment}              {handle_comment();                    }
 <INISC>{cronRule}      {handle_cronRule();                   }
 <INISC>{envar}         {handle_globEnvar();                  }
 <INISC>{id}            {handle_id();             BEGIN COMSC;}
 <OPTSC>{id}            {handle_id();             BEGIN COMSC;}
-{comment}              {handle_comment();                    }
 {emptyLine}            {handle_emptyLine();                  }
 <COMSC>{commandMulti}  {handle_commandMulti();               }
 <COMSC>{command}       {handle_command();        BEGIN OPTSC;}
