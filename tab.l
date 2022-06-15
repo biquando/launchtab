@@ -4,7 +4,7 @@
 
 comment        ^{spc}?#.*{eol}
 cronRule       ^{spc}?(({calEntry}{spc}){5}|{specialCal}{spc}).+{eol}
-id             ^\[.+\]{eol}
+id             ^{spc}?\[.+\]{eol}
 emptyLine      ^{spc}?{eol}
 commandMulti   ^{spc}?.*\\{eol}
 command        ^{spc}?.*{eol}
@@ -14,10 +14,10 @@ envar          ^{spc}?[^ \t=]+{spc}?={spc}?.*{eol}
 stdin          ^{spc}?\<.+{eol}
 stdout         ^{spc}?\>.+{eol}
 stderr         ^{spc}?2\>.+{eol}
-verbatimStart  ^---{eol}
-verbatimEnd    ^---{eol}
-verbatimLine   ^.*{eol}
-unknownOpt     ^{spc}?.*{eol}
+verbatimStart  ^{spc}?---{eol}
+verbatimEnd    ^{spc}?---{eol}
+verbatimLine   ^{spc}?.*{eol}
+unknownOpt     ^{spc}?{spc}?.*{eol}
 
 spc [ \t]+
 eol {spc}?\n
