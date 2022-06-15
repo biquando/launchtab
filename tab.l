@@ -2,25 +2,27 @@
 #include "launchtab.h"
 %}
 
-comment        ^{space}?#.*\n
-cronRule       ^{space}?({calEntry}{space}){5}.+\n
-id             ^\[.+\]\n
-emptyLine      ^{space}?\n
-commandMulti   ^{space}?.*\\\n
-command        ^{space}?.*\n
-interval       ^{space}?Interval{space}[0-9]+\n
-calendar       ^{space}?({calEntry}{space}){0,4}{calEntry}\n
-envar          ^{space}?[^ \t=]+{space}?={space}?.*\n
-stdin          ^{space}?\<.+\n
-stdout         ^{space}?\>.+\n
-stderr         ^{space}?2\>.+\n
-verbatimStart  ^---\n
-verbatimEnd    ^---\n
-verbatimLine   ^.*\n
-unknownOpt     ^{space}?.*\n
+comment        ^{spc}?#.*{eol}
+cronRule       ^{spc}?(({calEntry}{spc}){5}|{specialCal}{spc}).+{eol}
+id             ^\[.+\]{eol}
+emptyLine      ^{spc}?{eol}
+commandMulti   ^{spc}?.*\\{eol}
+command        ^{spc}?.*{eol}
+interval       ^{spc}?Interval{spc}[0-9]+{eol}
+calendar       ^{spc}?(({calEntry}{spc}){0,4}{calEntry}|{specialCal}){eol}
+envar          ^{spc}?[^ \t=]+{spc}?={spc}?.*{eol}
+stdin          ^{spc}?\<.+{eol}
+stdout         ^{spc}?\>.+{eol}
+stderr         ^{spc}?2\>.+{eol}
+verbatimStart  ^---{eol}
+verbatimEnd    ^---{eol}
+verbatimLine   ^.*{eol}
+unknownOpt     ^{spc}?.*{eol}
 
-space [ \t]+
-calEntry (\*|([0-9]+))
+spc [ \t]+
+eol {spc}?\n
+calEntry \*|([0-9]+)
+specialCal @(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)
 
 %s INISC
 %s COMSC
