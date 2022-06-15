@@ -10,7 +10,7 @@ commandMulti   ^{spc}?.*\\{eol}
 command        ^{spc}?.*{eol}
 interval       ^{spc}?Interval{spc}[0-9]+{eol}
 calendar       ^{spc}?(({calEntry}{spc}){0,4}{calEntry}|{specialCal}){eol}
-envar          ^{spc}?[^ \t=]+{spc}?={spc}?.*{eol}
+envar          ^{spc}?[^\n \t=]+{spc}?={spc}?.*{eol}
 stdin          ^{spc}?\<.+{eol}
 stdout         ^{spc}?\>.+{eol}
 stderr         ^{spc}?2\>.+{eol}
