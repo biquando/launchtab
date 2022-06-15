@@ -94,11 +94,13 @@ void write_plist(char *launchpath, struct rule r)
 	}
 
 	/* Look for $SHELL environment variable */
-	char *shell = DEFAULT_SHELL;
-	for (int i = 0; i < r.nvars; i++) {
-		if (strcmp("SHELL", r.varlabels[i]) == 0)
-			shell = r.varvalues[i];
+	char *shell = find_value("SHELL", r.varlabels, r.varvalues, r.nvars);
+	if (!shell) {
+		shell = find_value("SHELL",
+				varlabels_glob, varvalues_glob, nvars_glob);
 	}
+	if (!shell)
+		shell = DEFAULT_SHELL;
 
 	fprintf(f,
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
