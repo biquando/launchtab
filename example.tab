@@ -1,7 +1,13 @@
+# The SHELL environment variable sets which shell to run the commands with.
+# Defaults to /bin/sh.
 SHELL = /bin/bash
 
 0 5 * * 1 echo "Use crontab-like rules!"
 @monthly  echo "Run this command monthly"
+
+
+# If you want to use launchd-specific features, you need to create a rule as
+# follows.
 
 [com.example.task]
 echo "It is $(date)!" >>"$FILE"
@@ -21,7 +27,7 @@ FILE = /tmp/launchtab-example
 >  /dev/null
 2> /dev/null
 
-# additional keys
+# additional keys are inserted into the plist verbatim
 ---
 <key>RunAtLoad</key>
 <true/>

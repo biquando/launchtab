@@ -15,6 +15,7 @@ all: bin/launchtab
 bin/launchtab: tab.yy.o $(OBJ)
 	mkdir -p bin
 	$(LD) -o $@ $(LDFLAGS) $^
+	cp ltreload bin
 
 tab.yy.o: tab.yy.c
 	$(CC) -o $@ -c $<
