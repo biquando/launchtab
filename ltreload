@@ -2,7 +2,7 @@
 #
 # Reload user's launch agents.
 #
-# Usage: reloadd [PATTERN]
+# Usage: ltreload [PATTERN]
 #   PATTERN	agents that match PATTERN are reloaded (defaults to com.$USER)
 
 IDPAT="${1:-com.$USER}"
