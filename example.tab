@@ -1,5 +1,8 @@
 SHELL = /bin/bash
 
+0 5 * * 1 echo "Use crontab-like rules!"
+@monthly  echo "Run this command monthly"
+
 [com.example.task]
 echo "It is $(date)!" >>"$FILE"
 
