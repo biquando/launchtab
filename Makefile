@@ -5,27 +5,28 @@ LEX = flex
 CFLAGS = -Wall
 LDFLAGS =
 
-SRC = $(wildcard *.c)
+SRC = $(wildcard src/*.c)
 OBJ = $(SRC:.c=.o)
+LEXFILE = src/tab
 
 .PHONY: all clean
 
 all: bin/launchtab
 
-bin/launchtab: tab.yy.o $(OBJ)
+bin/launchtab: $(LEXFILE).yy.o $(OBJ)
 	mkdir -p bin
 	$(LD) -o $@ $(LDFLAGS) $^
 	cp ltreload bin
 
-tab.yy.o: tab.yy.c
+$(LEXFILE).yy.o: $(LEXFILE).yy.c
 	$(CC) -o $@ -c $<
 
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c $<
 
-tab.yy.c: tab.l
-	$(LEX) -o $@ --header-file=tab.yy.h --yylineno $<
+$(LEXFILE).yy.c: $(LEXFILE).l
+	$(LEX) -o $@ --header-file=$(LEXFILE).yy.h --yylineno $<
 
 clean:
-	rm -f $(OBJ) tab.yy.* bin/*
+	rm -f $(OBJ) $(LEXFILE).yy.* bin/*
 	rm -df bin
