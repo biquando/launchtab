@@ -25,7 +25,7 @@ static void usage(int err)
 static void setop(struct taboptions *opts, enum tabop op)
 {
 	if (opts->op) {
-		print_err("only one operation permitted\n");
+		PRT_E(fprintf(stderr, "only one operation permitted\n"));
 		usage(EINVAL);
 	}
 	opts->op = op;
@@ -70,12 +70,12 @@ struct taboptions parseopts(int argc, char *argv[])
 	opts.argv = argv + optind;
 
 	if (opts.op && opts.argc > 0) {
-		print_err("no arguments permitted after this option\n");
+		PRT_E(fprintf(stderr, "no arguments permitted after this option\n"));
 		usage(EINVAL);
 	}
 
 	if (opts.argc > 1) {
-		print_err("only one file argument allowed\n");
+		PRT_E(fprintf(stderr, "only one file argument allowed\n"));
 		usage(EINVAL);
 	}
 

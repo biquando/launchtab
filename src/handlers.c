@@ -104,7 +104,7 @@ static void parse_envar(char *text, char ***labs_p, char ***vals_p,
 
 void handle_cronRule(struct tab *t)
 {
-	print_dbg("cronRule: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "cronRule: %s", yytext));
 	yytext = trim(yytext);
 
 	struct rule *r = new_rule(t);
@@ -129,14 +129,14 @@ void handle_cronRule(struct tab *t)
 
 void handle_globEnvar(struct tab *t)
 {
-	print_dbg("globEnvar: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "globEnvar: %s", yytext));
 	parse_envar(yytext, &t->varlabels_glob, &t->varvalues_glob,
 			&t->nvars_glob);
 }
 
 void handle_id(struct tab *t)
 {
-	print_dbg("id: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "id: %s", yytext));
 	yytext = trim(yytext);
 
 	struct rule *r = new_rule(t);
@@ -149,12 +149,12 @@ void handle_id(struct tab *t)
 
 void handle_comment(struct tab *t)
 {
-	print_dbg("comment: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "comment: %s", yytext));
 }
 
 void handle_emptyLine(struct tab *t)
 {
-	print_dbg("emptyLine: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "emptyLine: %s", yytext));
 }
 
 void handle_commandMulti(struct tab *t)
@@ -164,7 +164,7 @@ void handle_commandMulti(struct tab *t)
 
 void handle_command(struct tab *t)
 {
-	print_dbg("command: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "command: %s", yytext));
 	yytext = trim(yytext);
 	int len = strlen(yytext);
 	if (len > 1 && yytext[len-1] == '\\') {
@@ -180,7 +180,7 @@ void handle_command(struct tab *t)
 
 void handle_interval(struct tab *t)
 {
-	print_dbg("interval: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "interval: %s", yytext));
 	yytext = trim(yytext);
 	yytext += sizeof("Interval");
 	yytext = trim(yytext);
@@ -192,7 +192,7 @@ void handle_interval(struct tab *t)
 
 void handle_calendar(struct tab *t)
 {
-	print_dbg("calendar: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "calendar: %s", yytext));
 	yytext = trim(yytext);
 
 	add_calendar(yytext, &t->rules[t->nrules - 1]);
@@ -200,14 +200,14 @@ void handle_calendar(struct tab *t)
 
 void handle_envar(struct tab *t)
 {
-	print_dbg("envar: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "envar: %s", yytext));
 	struct rule *r = &t->rules[t->nrules - 1];
 	parse_envar(yytext, &r->varlabels, &r->varvalues, &r->nvars);
 }
 
 void handle_stdin(struct tab *t)
 {
-	print_dbg("stdin: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "stdin: %s", yytext));
 	yytext = trim(yytext);
 	yytext += sizeof "<" - 1;
 	yytext = trim(yytext);
@@ -219,7 +219,7 @@ void handle_stdin(struct tab *t)
 
 void handle_stdout(struct tab *t)
 {
-	print_dbg("stdout: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "stdout: %s", yytext));
 	yytext = trim(yytext);
 	yytext += sizeof ">" - 1;
 	yytext = trim(yytext);
@@ -231,7 +231,7 @@ void handle_stdout(struct tab *t)
 
 void handle_stderr(struct tab *t)
 {
-	print_dbg("stderr: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "stderr: %s", yytext));
 	yytext = trim(yytext);
 	yytext += sizeof "2>" - 1;
 	yytext = trim(yytext);
@@ -244,27 +244,27 @@ void handle_stderr(struct tab *t)
 
 void handle_verbatimStart(struct tab *t)
 {
-	print_dbg("verbatimStart: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "verbatimStart: %s", yytext));
 }
 
 void handle_verbatimLine(struct tab *t)
 {
-	print_dbg("verbatimLine: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "verbatimLine: %s", yytext));
 	struct rule *r = &t->rules[t->nrules - 1];
 	r->verbatim = str_append(r->verbatim, yytext);
 }
 
 void handle_verbatimEnd(struct tab *t)
 {
-	print_dbg("verbatimEnd: %s", yytext);
+	PRT_DL(yylineno - 1, fprintf(stderr, "verbatimEnd: %s", yytext));
 }
 
 void handle_unknownOpt(struct tab *t)
 {
-	print_warnl("unknown option: %s", yylineno - 1, yytext);
+	PRT_WL(yylineno - 1, fprintf(stderr, "unknown option: %s", yytext));
 }
 
 void handle_invalid(struct tab *t)
 {
-	print_errl("invalid token\n", yylineno - 1);
+	PRT_EL(yylineno - 1, fprintf(stderr, "invalid token\n"));
 }

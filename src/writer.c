@@ -55,7 +55,7 @@ int edit_file(const char *file)
 		exit(errno);
 	}
 	if (!WIFEXITED(status) || WEXITSTATUS(status)) {
-		print_warn("%s exited abnormally\n", editor);
+		PRT_W(fprintf(stderr, "%s exited abnormally\n", editor));
 	}
 
 	if (stat(file, &statbuf) == 0)
@@ -78,12 +78,12 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	strcpy(path + strlen(path), r.id);
 	strcpy(path + strlen(path), ".plist");
 
-	print_dbg("path: %s\n", path);
+	PRT_D(fprintf(stderr, "path: %s\n", path));
 
 	FILE *f = fopen(path, "w");
 	if (!f) {
-		print_warn("couldn't open file %s\n", path);
-		print_info("  skipping rule...\n");
+		PRT_W(fprintf(stderr, "couldn't open file %s\n", path));
+		PRT_I(fprintf(stderr, "  skipping rule...\n"));
 		return;
 	}
 
@@ -201,5 +201,5 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	free(path);
 	fclose(f);
 
-	print_info("Wrote rule: %s\n", r.id);
+	PRT_I(fprintf(stderr, "Wrote rule: %s\n", r.id));
 }

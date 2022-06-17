@@ -120,7 +120,7 @@ static void import_tab(FILE *fd)
 static void edit_tab()
 {
 	if (!edit_file(tabpath)) {
-		print_info("no changes made to "TAB"\n");
+		PRT_I(fprintf(stderr, "no changes made to "TAB"\n"));
 		return;
 	}
 	install_tab();
@@ -130,10 +130,12 @@ static void list_tab()
 {
 	FILE *fd = fopen(tabpath, "r");
 	if (!fd && errno == ENOENT) {
-		if (errno == ENOENT)
-			print_err("user does not have a launchtab\n");
-		else
+		if (errno == ENOENT) {
+			PRT_E(fprintf(stderr,
+						"user does not have a launchtab\n"));
+		} else {
 			perror(NULL);
+		}
 		exit(errno);
 	}
 
@@ -158,7 +160,7 @@ int main(int argc, char *argv[])
 	char *home = getenv("HOME");
 
 	if (!home) {
-		print_err("missing $HOME variable.\n");
+		PRT_E(fprintf(stderr, "missing $HOME variable.\n"));
 		exit(ENOENT);
 	}
 
@@ -175,12 +177,12 @@ int main(int argc, char *argv[])
 	char tmpc = tabpath[tabdirlen];
 	tabpath[tabdirlen] = '\0';
 	if (mkdir_p(launchpath) < 0) {
-		print_err("couldn't create directory: %s\n", launchpath);
+		PRT_E(fprintf(stderr, "couldn't create directory: %s\n", launchpath));
 		perror(NULL);
 		exit(errno);
 	}
 	if (mkdir_p(tabpath) < 0) {
-		print_err("couldn't create directory: %s\n", tabpath);
+		PRT_E(fprintf(stderr, "couldn't create directory: %s\n", tabpath));
 		perror(NULL);
 		exit(errno);
 	}
@@ -197,7 +199,7 @@ int main(int argc, char *argv[])
 		if (argc > 0) {
 			fd = fopen(argv[0], "r");
 			if (!fd) {
-				print_err("%s: ", argv[0]);
+				PRT_E(fprintf(stderr, "%s: ", argv[0]));
 				perror(NULL);
 				exit(errno);
 			}
