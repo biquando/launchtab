@@ -15,9 +15,6 @@ struct calendar {
 	char *ent[5];
 };
 
-extern const char *caltype[5];
-extern const char *fdtype[3];
-
 struct rule {
 	char *id;
 	char *command;

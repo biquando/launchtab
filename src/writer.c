@@ -11,7 +11,7 @@
 #include "util.h"
 #include "writer.h"
 
-const char *caltype[5] = {
+static const char *caltype[5] = {
 	"Minute",
 	"Hour",
 	"Day",
@@ -19,7 +19,7 @@ const char *caltype[5] = {
 	"Weekday"
 };
 
-const char *fdtype[3] = {
+static const char *fdtype[3] = {
 	"In",
 	"Out",
 	"Err"
