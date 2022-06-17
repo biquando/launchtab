@@ -71,12 +71,10 @@ int edit_file(const char *file)
 
 void write_plist(char *launchpath, struct tab *t, struct rule r)
 {
-	char *path = try_malloc(strlen(launchpath) + strlen(r.id)
-			+ sizeof ".plist");
-	strcpy(path, launchpath);
-	strcpy(path + strlen(path), "/");
-	strcpy(path + strlen(path), r.id);
-	strcpy(path + strlen(path), ".plist");
+	char *path = str_append(NULL, launchpath);
+	path = str_append(path, "/");
+	path = str_append(path, r.id);
+	path = str_append(path, ".plist");
 
 	print_dbg("path: %s\n", path);
 

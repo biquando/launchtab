@@ -57,15 +57,10 @@ char *trim(char *str)
  * Returns the new string, reallocated from str1. */
 char *str_append(char *str1, char *str2)
 {
-	if (str1) {
-		int l1 = strlen(str1);
-		int l2 = strlen(str2);
-		str1 = try_realloc(str1, l1 + l2 + 1);
-		strcpy(str1 + l1, str2);
-	} else {
-		str1 = try_realloc(str1, strlen(str2) + 1);
-		strcpy(str1, str2);
-	}
+	int l1 = str1 ? strlen(str1) : 0;
+	int l2 = strlen(str2);
+	str1 = try_realloc(str1, l1 + l2 + 1);
+	strcpy(str1 + l1, str2);
 	return str1;
 }
 

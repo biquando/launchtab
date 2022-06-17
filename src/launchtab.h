@@ -4,11 +4,6 @@
 #include <stdio.h>
 
 #define DEFAULT_EDITOR "nano"
-#define CONFIG ".config/"
-#define TABDIR "launchtab/"
-#define TAB    "launch.tab"
-#define TABPATH CONFIG TABDIR TAB
-#define LAUNCHPATH "Library/LaunchAgents"
 #define DEFAULT_SHELL "/bin/sh"
 
 struct calendar {
@@ -37,7 +32,7 @@ struct tab {
 	char **varvalues_glob;
 	unsigned int nvars_glob;
 
-	int valid;
+	int invalid;
 };
 
 void lex_tab(FILE *f, struct tab *t);

@@ -120,7 +120,7 @@ static void import_tab(FILE *fd)
 static void edit_tab()
 {
 	if (!edit_file(tabpath)) {
-		print_info("no changes made to "TAB"\n");
+		print_info("no changes made\n");
 		return;
 	}
 	install_tab();
@@ -162,13 +162,11 @@ int main(int argc, char *argv[])
 		exit(ENOENT);
 	}
 
-	tabpath = try_malloc(strlen(home) + sizeof "/" TABPATH);
-	strcpy(tabpath, home);
-	strcpy(tabpath + strlen(home), "/" TABPATH);
+	tabpath = str_append(NULL, home);
+	tabpath = str_append(tabpath, "/.config/launchtab/launch.tab");
 
-	launchpath = try_malloc(strlen(home) + sizeof "/" LAUNCHPATH);
-	strcpy(launchpath, home);
-	strcpy(launchpath + strlen(home), "/" LAUNCHPATH);
+	launchpath = str_append(NULL, home);
+	launchpath = str_append(launchpath, "/Library/LaunchAgents");
 
 	/* mkdir_p: dirname(tabpath) and launchpath */
 	size_t tabdirlen = dirname(tabpath, NULL);
