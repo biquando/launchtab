@@ -69,14 +69,9 @@ int edit_file(const char *file)
 	return 1;
 }
 
-void write_plist(char *launchpath, struct tab *t, struct rule r)
+void write_plist(char *path, struct tab *t, struct rule *r)
 {
-	char *path = str_append(NULL, launchpath);
-	path = str_append(path, "/");
-	path = str_append(path, r.id);
-	path = str_append(path, ".plist");
-
-	print_dbg("path: %s\n", path);
+	print_dbg("writing plist: %s\n", path);
 
 	FILE *f = fopen(path, "w");
 	if (!f) {
@@ -86,7 +81,7 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	}
 
 	/* Look for $SHELL environment variable */
-	char *shell = find_value("SHELL", r.varlabels, r.varvalues, r.nvars);
+	char *shell = find_value("SHELL", r->varlabels, r->varvalues, r->nvars);
 	if (!shell) {
 		shell = find_value("SHELL", t->varlabels_glob,
 				t->varvalues_glob, t->nvars_glob);
@@ -101,52 +96,52 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 		"<plist version=\"1.0\">\n"
 		"<dict>\n"
 		"    <key>Label</key>\n"
-		"    <string>%s</string>\n", r.id);
+		"    <string>%s</string>\n", r->id);
 	fprintf(f,
 		"    <key>ProgramArguments</key>\n"
 		"    <array>\n"
 		"        <string>%s</string>\n"
 		"        <string>-c</string>\n"
 		"        <string>exec %s</string>\n"
-		"    </array>\n", shell, r.command ? r.command : "");
+		"    </array>\n", shell, r->command ? r->command : "");
 
 	/* Interval */
-	if (r.interval) {
+	if (r->interval) {
 		fprintf(f,
 			"    <key>StartInterval</key>\n"
-			"    <integer>%s</integer>\n", r.interval);
+			"    <integer>%s</integer>\n", r->interval);
 	}
 
 	/* Single calendar */
-	if (r.ncals == 1) {
+	if (r->ncals == 1) {
 		fprintf(f,
 			"    <key>StartCalendarInterval</key>\n"
 			"    <dict>\n");
 		for (int e = 0; e < 5; e++) {
-			if (!r.cal->ent[e])
+			if (!r->cal->ent[e])
 				continue;
 			fprintf(f,
 				"        <key>%s</key>\n"
 				"        <integer>%s</integer>\n",
-				caltype[e], r.cal->ent[e]);
+				caltype[e], r->cal->ent[e]);
 		}
 		fprintf(f, "    </dict>\n");
 	}
 
 	/* Multiple calendars */
-	if (r.ncals > 1) {
+	if (r->ncals > 1) {
 		fprintf(f,
 			"    <key>StartCalendarInterval</key>\n"
 			"    <array>\n");
-		for (int c = 0; c < r.ncals; c++) {
+		for (int c = 0; c < r->ncals; c++) {
 			fprintf(f, "        <dict>\n");
 			for (int e = 0; e < 5; e++) {
-				if (!r.cal[c].ent[e])
+				if (!r->cal[c].ent[e])
 					continue;
 				fprintf(f,
 					"            <key>%s</key>\n"
 					"            <integer>%s</integer>\n",
-					caltype[e], r.cal[c].ent[e]);
+					caltype[e], r->cal[c].ent[e]);
 			}
 			fprintf(f, "        </dict>\n");
 		}
@@ -154,7 +149,7 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	}
 
 	/* Environment variables */
-	if (r.nvars > 0) {
+	if (r->nvars > 0) {
 		fprintf(f,
 			"    <key>EnvironmentVariables</key>\n"
 			"    <dict>\n");
@@ -162,36 +157,36 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	for (int v = 0; v < t->nvars_glob; v++) { /* Global envars */
 		/* Only add global variables if they aren't locally set */
 		if (!find_value(t->varlabels_glob[v],
-		               r.varlabels,
-		               r.varvalues,
-		               r.nvars)) {
+		               r->varlabels,
+		               r->varvalues,
+		               r->nvars)) {
 			fprintf(f,
 				"        <key>%s</key>\n"
 				"        <string>%s</string>\n",
 				t->varlabels_glob[v], t->varvalues_glob[v]);
 		}
 	}
-	for (int v = 0; v < r.nvars; v++) { /* Local envars */
+	for (int v = 0; v < r->nvars; v++) { /* Local envars */
 		fprintf(f,
 			"        <key>%s</key>\n"
 			"        <string>%s</string>\n",
-			r.varlabels[v], r.varvalues[v]);
+			r->varlabels[v], r->varvalues[v]);
 	}
-	if (r.nvars > 0)
+	if (r->nvars > 0)
 		fprintf(f, "    </dict>\n");
 
 	/* File descriptors */
 	for (int n = 0; n < 3; n++) {
-		if (!r.fd[n])
+		if (!r->fd[n])
 			continue;
 		fprintf(f,
 			"    <key>Standard%sPath</key>\n"
 			"    <string>%s</string>\n",
-			fdtype[n], r.fd[n]);
+			fdtype[n], r->fd[n]);
 	}
 
-	if (r.verbatim)
-		fprintf(f, "%s", r.verbatim);
+	if (r->verbatim)
+		fprintf(f, "%s", r->verbatim);
 
 	fprintf(f, "</dict>\n"
 		"</plist>\n");
@@ -199,5 +194,39 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 	free(path);
 	fclose(f);
 
-	print_info("Wrote rule: %s\n", r.id);
+	print_info("Wrote rule: %s\n", r->id);
+}
+
+
+void uninstall_tab(char *launchpath, struct tab *t)
+{
+	/* TODO: unload rules */
+
+	for (int i = 0; i < t->nrules; i++) {
+		struct rule *r = &t->rules[i];
+		char *plist = str_append(NULL, launchpath);
+		plist = str_append(plist, "/");
+		plist = str_append(plist, r->id);
+		plist = str_append(plist, ".plist");
+
+		if (unlink(plist) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+	}
+}
+
+void install_tab(char *launchpath, struct tab *t)
+{
+	for (int i = 0; i < t->nrules; i++) {
+		struct rule *r = &t->rules[i];
+		char *plist = str_append(NULL, launchpath);
+		plist = str_append(plist, "/");
+		plist = str_append(plist, r->id);
+		plist = str_append(plist, ".plist");
+
+		write_plist(plist, t, r);
+	}
+
+	/* TODO: load rules */
 }

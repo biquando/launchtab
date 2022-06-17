@@ -12,11 +12,10 @@
 
 int debug;
 int quiet = 0;
-
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
-static void install_tab()
+static void _install_tab()
 {
 	FILE *tabf = fopen(tabpath, "r");
 	if (!tabf) {
@@ -55,10 +54,7 @@ static void install_tab()
 		}
 	}
 
-	/* Write rules */
-	for (int r = 0; r < t.nrules; r++) {
-		write_plist(launchpath, &t, t.rules[r]);
-	}
+	install_tab(launchpath, &t);
 
 	/* Free rules */
 	for (int i = 0; i < t.nrules; i++) {
@@ -88,7 +84,7 @@ static void install_tab()
 	free(t.varvalues_glob);
 }
 
-static void import_tab(FILE *fd)
+static void _import_tab(FILE *fd)
 {
 	if (!fd) {
 		if (!(fd = tmpfile())) {
@@ -114,19 +110,19 @@ static void import_tab(FILE *fd)
 	fclose(fd); /* note that this function closes fd */
 	fclose(tabfd);
 
-	install_tab();
+	_install_tab();
 }
 
-static void edit_tab()
+static void _edit_tab()
 {
 	if (!edit_file(tabpath)) {
 		print_info("no changes made\n");
 		return;
 	}
-	install_tab();
+	_install_tab();
 }
 
-static void list_tab()
+static void _list_tab()
 {
 	FILE *fd = fopen(tabpath, "r");
 	if (!fd && errno == ENOENT) {
@@ -145,7 +141,7 @@ static void list_tab()
 	fclose(fd);
 }
 
-static void remove_tab()
+static void _remove_tab()
 {
 	if (unlink(tabpath) < 0) {
 		perror(NULL);
@@ -202,16 +198,16 @@ int main(int argc, char *argv[])
 		} else {
 			fd = NULL;
 		}
-		import_tab(fd);
+		_import_tab(fd);
 		break;
 	case EDTAB:
-		edit_tab();
+		_edit_tab();
 		break;
 	case LSTAB:
-		list_tab();
+		_list_tab();
 		break;
 	case RMTAB:
-		remove_tab();
+		_remove_tab();
 		break;
 	default:
 		exit(EINVAL);
