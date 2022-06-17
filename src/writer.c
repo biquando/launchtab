@@ -71,12 +71,6 @@ int edit_file(const char *file)
 
 void write_plist(char *launchpath, struct tab *t, struct rule r)
 {
-	if (!r.id || !r.command) {
-		print_warn("rule is missing a command: %s\n", r.id);
-		print_info("  skipping rule...\n");
-		return;
-	}
-
 	char *path = try_malloc(strlen(launchpath) + strlen(r.id)
 			+ sizeof ".plist");
 	strcpy(path, launchpath);
@@ -116,7 +110,7 @@ void write_plist(char *launchpath, struct tab *t, struct rule r)
 		"        <string>%s</string>\n"
 		"        <string>-c</string>\n"
 		"        <string>exec %s</string>\n"
-		"    </array>\n", shell, r.command);
+		"    </array>\n", shell, r.command ? r.command : "");
 
 	/* Interval */
 	if (r.interval) {
