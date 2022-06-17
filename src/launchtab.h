@@ -1,6 +1,8 @@
 #ifndef _LAUNCHTAB_LAUNCHTAB_H
 #define _LAUNCHTAB_LAUNCHTAB_H
 
+#include <stdio.h>
+
 #define DEFAULT_EDITOR "nano"
 #define CONFIG ".config/"
 #define TABDIR "launchtab/"
@@ -8,30 +10,6 @@
 #define TABPATH CONFIG TABDIR TAB
 #define LAUNCHPATH "Library/LaunchAgents"
 #define DEFAULT_SHELL "/bin/sh"
-
-void lex_init(void);
-
-void handle_cronRule(void);
-void handle_globEnvar(void);
-void handle_id(void);
-void handle_comment(void);
-void handle_emptyLine(void);
-void handle_commandMulti(void);
-void handle_command(void);
-
-void handle_interval(void);
-void handle_calendar(void);
-void handle_envar(void);
-void handle_stdin(void);
-void handle_stdout(void);
-void handle_stderr(void);
-
-void handle_verbatimStart(void);
-void handle_verbatimLine(void);
-void handle_verbatimEnd(void);
-void handle_unknownOpt(void);
-
-void handle_invalid(void);
 
 struct calendar {
 	char *ent[5];
@@ -53,13 +31,41 @@ struct rule {
 	char *verbatim;
 };
 
-extern struct rule *rules;
-extern unsigned int nrules;
-extern unsigned int ncronrules;
+struct tab {
+	struct rule *rules;
+	unsigned int nrules;
+	unsigned int ncronrules;
 
-extern char **varlabels_glob;
-extern char **varvalues_glob;
-extern unsigned int nvars_glob;
+	char **varlabels_glob;
+	char **varvalues_glob;
+	unsigned int nvars_glob;
+
+	int valid;
+};
+
+void lex_tab(FILE *f, struct tab *t);
+
+void handle_cronRule(struct tab *t);
+void handle_globEnvar(struct tab *t);
+void handle_id(struct tab *t);
+void handle_comment(struct tab *t);
+void handle_emptyLine(struct tab *t);
+void handle_commandMulti(struct tab *t);
+void handle_command(struct tab *t);
+
+void handle_interval(struct tab *t);
+void handle_calendar(struct tab *t);
+void handle_envar(struct tab *t);
+void handle_stdin(struct tab *t);
+void handle_stdout(struct tab *t);
+void handle_stderr(struct tab *t);
+
+void handle_verbatimStart(struct tab *t);
+void handle_verbatimLine(struct tab *t);
+void handle_verbatimEnd(struct tab *t);
+void handle_unknownOpt(struct tab *t);
+
+void handle_invalid(struct tab *t);
 
 extern int debug;
 extern int quiet;

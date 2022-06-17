@@ -1,5 +1,7 @@
 %{
 #include "launchtab.h"
+
+static struct tab *curr_tab;
 %}
 
 comment        ^{spc}?#.*{eol}
@@ -31,28 +33,28 @@ specialCal @(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)
 
 %%
 
-{comment}              {handle_comment();                    }
-<INISC>{cronRule}      {handle_cronRule();                   }
-<INISC>{envar}         {handle_globEnvar();                  }
-<INISC>{id}            {handle_id();             BEGIN COMSC;}
-<OPTSC>{id}            {handle_id();             BEGIN COMSC;}
-{emptyLine}            {handle_emptyLine();                  }
-<COMSC>{commandMulti}  {handle_commandMulti();               }
-<COMSC>{command}       {handle_command();        BEGIN OPTSC;}
+{comment}              {handle_comment(curr_tab);                    }
+<INISC>{cronRule}      {handle_cronRule(curr_tab);                   }
+<INISC>{envar}         {handle_globEnvar(curr_tab);                  }
+<INISC>{id}            {handle_id(curr_tab);             BEGIN COMSC;}
+<OPTSC>{id}            {handle_id(curr_tab);             BEGIN COMSC;}
+{emptyLine}            {handle_emptyLine(curr_tab);                  }
+<COMSC>{commandMulti}  {handle_commandMulti(curr_tab);               }
+<COMSC>{command}       {handle_command(curr_tab);        BEGIN OPTSC;}
 
-<OPTSC>{verbatimStart} {handle_verbatimStart();  BEGIN VERSC;}
-<OPTSC>{interval}      {handle_interval();                   }
-<OPTSC>{calendar}      {handle_calendar();                   }
-<OPTSC>{envar}         {handle_envar();                      }
-<OPTSC>{stdin}         {handle_stdin();                      }
-<OPTSC>{stdout}        {handle_stdout();                     }
-<OPTSC>{stderr}        {handle_stderr();                     }
+<OPTSC>{verbatimStart} {handle_verbatimStart(curr_tab);  BEGIN VERSC;}
+<OPTSC>{interval}      {handle_interval(curr_tab);                   }
+<OPTSC>{calendar}      {handle_calendar(curr_tab);                   }
+<OPTSC>{envar}         {handle_envar(curr_tab);                      }
+<OPTSC>{stdin}         {handle_stdin(curr_tab);                      }
+<OPTSC>{stdout}        {handle_stdout(curr_tab);                     }
+<OPTSC>{stderr}        {handle_stderr(curr_tab);                     }
 
-<VERSC>{verbatimEnd}   {handle_verbatimEnd();    BEGIN OPTSC;}
-<VERSC>{verbatimLine}  {handle_verbatimLine();               }
-<OPTSC>{unknownOpt}    {handle_unknownOpt();                 }
+<VERSC>{verbatimEnd}   {handle_verbatimEnd(curr_tab);    BEGIN OPTSC;}
+<VERSC>{verbatimLine}  {handle_verbatimLine(curr_tab);               }
+<OPTSC>{unknownOpt}    {handle_unknownOpt(curr_tab);                 }
 
-<*>.|\n                {handle_invalid();      yyterminate();}
+<*>.|\n                {handle_invalid(curr_tab);      yyterminate();}
 
 %%
 
@@ -61,7 +63,10 @@ int yywrap(void)
 	return 1;
 }
 
-void lex_init(void)
+void lex_tab(FILE *f, struct tab *t)
 {
+	yyin = f;
+	curr_tab = t;
 	BEGIN INISC;
+	yylex();
 }

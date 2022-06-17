@@ -2,20 +2,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "launchtab.h"
 #include "options.h"
 #include "style.h"
-#include "tab.yy.h"
-#include "writer.h"
 #include "util.h"
+#include "writer.h"
 
-struct rule *rules;
-unsigned int nrules;
-unsigned int ncronrules;
-char **varlabels_glob;
-char **varvalues_glob;
-unsigned int nvars_glob;
 int debug;
 int quiet = 0;
 
@@ -24,31 +18,21 @@ static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
 static void install_tab()
 {
-	FILE *fd = fopen(tabpath, "r");
-	if (!fd) {
+	FILE *tabf = fopen(tabpath, "r");
+	if (!tabf) {
 		perror(NULL);
 		exit(errno);
 	}
 
-	/* Initialize rules */
-	rules = NULL;
-	nrules = 0;
-	ncronrules = 0;
-
-	/* Initialize global envars */
-	varlabels_glob = NULL;
-	varvalues_glob = NULL;
-	nvars_glob = 0;
-
-	yyin = fd;
-	lex_init();
-	yylex();
+	struct tab t = {0};
+	lex_tab(tabf, &t);
+	fclose(tabf);
 
 	/* Print rules */
 	if (debug) {
 		fprintf(stderr, "\n=================================\n\n");
-		for (int i = 0; i < nrules; i++) {
-			struct rule r = rules[i];
+		for (int i = 0; i < t.nrules; i++) {
+			struct rule r = t.rules[i];
 			fprintf(stderr, "[%s]\n", r.id);
 			fprintf(stderr, "%s\n", r.command);
 			if (r.interval)
@@ -72,13 +56,13 @@ static void install_tab()
 	}
 
 	/* Write rules */
-	for (int r = 0; r < nrules; r++) {
-		write_plist(launchpath, rules[r]);
+	for (int r = 0; r < t.nrules; r++) {
+		write_plist(launchpath, &t, t.rules[r]);
 	}
 
 	/* Free rules */
-	for (int i = 0; i < nrules; i++) {
-		struct rule r = rules[i];
+	for (int i = 0; i < t.nrules; i++) {
+		struct rule r = t.rules[i];
 		free(r.id);
 		free(r.command);
 		free(r.cal);
@@ -93,18 +77,15 @@ static void install_tab()
 		free(r.fd[2]);
 		free(r.verbatim);
 	}
-	free(rules);
+	free(t.rules);
 
 	/* Free global envars */
-	for (int i = 0; i < nvars_glob; i++) {
-		free(varlabels_glob[i]);
-		free(varvalues_glob[i]);
+	for (int i = 0; i < t.nvars_glob; i++) {
+		free(t.varlabels_glob[i]);
+		free(t.varvalues_glob[i]);
 	}
-	free(varlabels_glob);
-	free(varvalues_glob);
-
-	fclose(fd);
-
+	free(t.varlabels_glob);
+	free(t.varvalues_glob);
 }
 
 static void import_tab(FILE *fd)

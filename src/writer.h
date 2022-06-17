@@ -5,6 +5,6 @@
 #include "launchtab.h"
 
 int edit_file(const char *file);
-void write_plist(char *launchpath, struct rule r);
+void write_plist(char *launchpath, struct tab *t, struct rule r);
 
 #endif

@@ -8,8 +8,8 @@
 
 #include "launchtab.h"
 #include "style.h"
-#include "writer.h"
 #include "util.h"
+#include "writer.h"
 
 const char *caltype[5] = {
 	"Minute",
@@ -69,7 +69,7 @@ int edit_file(const char *file)
 	return 1;
 }
 
-void write_plist(char *launchpath, struct rule r)
+void write_plist(char *launchpath, struct tab *t, struct rule r)
 {
 	if (!r.id || !r.command) {
 		print_warn("rule is missing a command: %s\n", r.id);
@@ -96,8 +96,8 @@ void write_plist(char *launchpath, struct rule r)
 	/* Look for $SHELL environment variable */
 	char *shell = find_value("SHELL", r.varlabels, r.varvalues, r.nvars);
 	if (!shell) {
-		shell = find_value("SHELL",
-				varlabels_glob, varvalues_glob, nvars_glob);
+		shell = find_value("SHELL", t->varlabels_glob,
+				t->varvalues_glob, t->nvars_glob);
 	}
 	if (!shell)
 		shell = DEFAULT_SHELL;
@@ -167,16 +167,16 @@ void write_plist(char *launchpath, struct rule r)
 			"    <key>EnvironmentVariables</key>\n"
 			"    <dict>\n");
 	}
-	for (int v = 0; v < nvars_glob; v++) { /* Global envars */
+	for (int v = 0; v < t->nvars_glob; v++) { /* Global envars */
 		/* Only add global variables if they aren't locally set */
-		if (!find_value(varlabels_glob[v],
+		if (!find_value(t->varlabels_glob[v],
 		               r.varlabels,
 		               r.varvalues,
 		               r.nvars)) {
 			fprintf(f,
 				"        <key>%s</key>\n"
 				"        <string>%s</string>\n",
-				varlabels_glob[v], varvalues_glob[v]);
+				t->varlabels_glob[v], t->varvalues_glob[v]);
 		}
 	}
 	for (int v = 0; v < r.nvars; v++) { /* Local envars */

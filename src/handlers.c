@@ -9,12 +9,12 @@
 extern char *yytext;
 extern int yylineno;
 
-static struct rule *new_rule(void)
+static struct rule *new_rule(struct tab *t)
 {
-	nrules++;
-	rules = try_realloc(rules, nrules * sizeof *rules);
+	t->nrules++;
+	t->rules = try_realloc(t->rules, t->nrules * sizeof *t->rules);
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	memset(r, 0, sizeof *r);
 	return r;
 }
@@ -102,14 +102,14 @@ static void parse_envar(char *text, char ***labs_p, char ***vals_p,
 }
 
 
-void handle_cronRule(void)
+void handle_cronRule(struct tab *t)
 {
 	print_dbg("cronRule: %s", yytext);
 	yytext = trim(yytext);
 
-	struct rule *r = new_rule();
-	r->id = try_malloc(sizeof "cron.rule." + ncronrules/10);
-	sprintf(r->id, "cron.rule.%u", ncronrules++);
+	struct rule *r = new_rule(t);
+	r->id = try_malloc(sizeof "cron.rule." + t->ncronrules/10);
+	sprintf(r->id, "cron.rule.%u", t->ncronrules++);
 
 	yytext = add_calendar(yytext, r);
 	if (yytext) {
@@ -127,18 +127,19 @@ void handle_cronRule(void)
 	}
 }
 
-void handle_globEnvar(void)
+void handle_globEnvar(struct tab *t)
 {
 	print_dbg("globEnvar: %s", yytext);
-	parse_envar(yytext, &varlabels_glob, &varvalues_glob, &nvars_glob);
+	parse_envar(yytext, &t->varlabels_glob, &t->varvalues_glob,
+			&t->nvars_glob);
 }
 
-void handle_id(void)
+void handle_id(struct tab *t)
 {
 	print_dbg("id: %s", yytext);
 	yytext = trim(yytext);
 
-	struct rule *r = new_rule();
+	struct rule *r = new_rule(t);
 
 	int len = strlen(yytext);
 	yytext[len - 1] = '\0'; /* remove trailing ] */
@@ -146,22 +147,22 @@ void handle_id(void)
 	strcpy(r->id, yytext + 1); /* remove leading [ */
 }
 
-void handle_comment(void)
+void handle_comment(struct tab *t)
 {
 	print_dbg("comment: %s", yytext);
 }
 
-void handle_emptyLine(void)
+void handle_emptyLine(struct tab *t)
 {
 	print_dbg("emptyLine: %s", yytext);
 }
 
-void handle_commandMulti(void)
+void handle_commandMulti(struct tab *t)
 {
-	handle_command();
+	handle_command(t);
 }
 
-void handle_command(void)
+void handle_command(struct tab *t)
 {
 	print_dbg("command: %s", yytext);
 	yytext = trim(yytext);
@@ -170,100 +171,100 @@ void handle_command(void)
 		yytext[len-1] = '\0'; /* remove trailing backslash */
 	}
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->command = str_append(r->command, yytext);
 }
 
 
 /* Options */
 
-void handle_interval(void)
+void handle_interval(struct tab *t)
 {
 	print_dbg("interval: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof("Interval");
 	yytext = trim(yytext);
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->interval = try_realloc(r->interval, strlen(yytext) + 1);
 	strcpy(r->interval, yytext);
 }
 
-void handle_calendar(void)
+void handle_calendar(struct tab *t)
 {
 	print_dbg("calendar: %s", yytext);
 	yytext = trim(yytext);
 
-	add_calendar(yytext, &rules[nrules - 1]);
+	add_calendar(yytext, &t->rules[t->nrules - 1]);
 }
 
-void handle_envar(void)
+void handle_envar(struct tab *t)
 {
 	print_dbg("envar: %s", yytext);
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	parse_envar(yytext, &r->varlabels, &r->varvalues, &r->nvars);
 }
 
-void handle_stdin(void)
+void handle_stdin(struct tab *t)
 {
 	print_dbg("stdin: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof "<" - 1;
 	yytext = trim(yytext);
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->fd[0] = try_realloc(r->fd[0], strlen(yytext) + 1);
 	strcpy(r->fd[0], yytext);
 }
 
-void handle_stdout(void)
+void handle_stdout(struct tab *t)
 {
 	print_dbg("stdout: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof ">" - 1;
 	yytext = trim(yytext);
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->fd[1] = try_realloc(r->fd[1], strlen(yytext) + 1);
 	strcpy(r->fd[1], yytext);
 }
 
-void handle_stderr(void)
+void handle_stderr(struct tab *t)
 {
 	print_dbg("stderr: %s", yytext);
 	yytext = trim(yytext);
 	yytext += sizeof "2>" - 1;
 	yytext = trim(yytext);
 
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->fd[2] = try_realloc(r->fd[2], strlen(yytext) + 1);
 	strcpy(r->fd[2], yytext);
 }
 
 
-void handle_verbatimStart(void)
+void handle_verbatimStart(struct tab *t)
 {
 	print_dbg("verbatimStart: %s", yytext);
 }
 
-void handle_verbatimLine(void)
+void handle_verbatimLine(struct tab *t)
 {
 	print_dbg("verbatimLine: %s", yytext);
-	struct rule *r = &rules[nrules - 1];
+	struct rule *r = &t->rules[t->nrules - 1];
 	r->verbatim = str_append(r->verbatim, yytext);
 }
 
-void handle_verbatimEnd(void)
+void handle_verbatimEnd(struct tab *t)
 {
 	print_dbg("verbatimEnd: %s", yytext);
 }
 
-void handle_unknownOpt(void)
+void handle_unknownOpt(struct tab *t)
 {
 	print_warnl("unknown option: %s", yylineno - 1, yytext);
 }
 
-void handle_invalid(void)
+void handle_invalid(struct tab *t)
 {
 	print_errl("invalid token\n", yylineno - 1);
 }
