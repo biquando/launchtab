@@ -12,124 +12,102 @@
 
 int debug;
 int quiet = 0;
-
+static char *home;        /*  ~                               */
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
-static void install_tab()
+static void _install_file(char *path)
 {
+	/* Read new */
+	struct tab newtab = read_tab(path);
+
+	/* Check vaildity */
+	if (newtab.invalid) {
+		print_err("Aborting. Check %s\n", path);
+		exit(EINVAL);
+	}
+
+	/* Read old */
+	struct tab oldtab = read_tab(tabpath);
+
+	/* Copy file */
+	FILE *newfile = fopen(path, "r");
+	FILE *oldfile = fopen(tabpath, "w");
+	if (!newfile || !oldfile || cpfile(newfile, oldfile) < 0) {
+		perror(NULL);
+		exit(errno);
+	}
+	fclose(newfile);
+	fclose(oldfile);
+
+	/* Uninstall old */
+	uninstall_tab(launchpath, &oldtab);
+
+	/* Install new */
+	install_tab(launchpath, &newtab);
+
+	/* Free tabs */
+	free_tab(&oldtab);
+	free_tab(&newtab);
+}
+
+static void _import_tab(char *path)
+{
+	FILE *tmpf = NULL;
+
+	if (!path) {
+		path = str_append(NULL, home);
+		path = str_append(path, "/.config/launchtab/temp.XXXX");
+		path = mktemp(path);
+		tmpf = fopen(path, "w");
+		if (!tmpf || cpfile(stdin, tmpf) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+		fflush(tmpf);
+	}
+
+	_install_file(path);
+
+	if (tmpf) {
+		fclose(tmpf);
+		remove(path);
+		free(path);
+	}
+}
+
+static void _edit_tab()
+{
+	char *path = str_append(NULL, home);
+	path = str_append(path, "/.config/launchtab/temp.XXXX");
+	path = mktemp(path);
+	FILE *tmpf = fopen(path, "w");
 	FILE *tabf = fopen(tabpath, "r");
-	if (!tabf) {
-		perror(NULL);
-		exit(errno);
-	}
 
-	struct tab t = {0};
-	lex_tab(tabf, &t);
-	fclose(tabf);
-
-	/* Print rules */
-	if (debug) {
-		fprintf(stderr, "\n=================================\n\n");
-		for (int i = 0; i < t.nrules; i++) {
-			struct rule r = t.rules[i];
-			fprintf(stderr, "[%s]\n", r.id);
-			fprintf(stderr, "%s\n", r.command);
-			if (r.interval)
-				fprintf(stderr, "Interval: %s\n", r.interval);
-			for (int c = 0; c < r.ncals; c++) {
-				fprintf(stderr, "Calendar:");
-				for (int e = 0; e < 5; e++) {
-					fprintf(stderr, " %s", r.cal[c].ent[e]);
-				}
-				fprintf(stderr, "\n");
-			}
-			for (int v = 0; v < r.nvars; v++) {
-				fprintf(stderr, "Variable: %s = %s\n",
-						r.varlabels[v], r.varvalues[v]);
-			}
-			fprintf(stderr, "stdin: %s\n", r.fd[0]);
-			fprintf(stderr, "stdout: %s\n", r.fd[1]);
-			fprintf(stderr, "stderr: %s\n", r.fd[2]);
-			fprintf(stderr, "verbatim: %s\n", r.verbatim);
-		}
-	}
-
-	/* Write rules */
-	for (int r = 0; r < t.nrules; r++) {
-		write_plist(launchpath, &t, t.rules[r]);
-	}
-
-	/* Free rules */
-	for (int i = 0; i < t.nrules; i++) {
-		struct rule r = t.rules[i];
-		free(r.id);
-		free(r.command);
-		free(r.cal);
-		for (int v = 0; v < r.nvars; v++) {
-			free(r.varlabels[v]);
-			free(r.varvalues[v]);
-		}
-		free(r.varlabels);
-		free(r.varvalues);
-		free(r.fd[0]);
-		free(r.fd[1]);
-		free(r.fd[2]);
-		free(r.verbatim);
-	}
-	free(t.rules);
-
-	/* Free global envars */
-	for (int i = 0; i < t.nvars_glob; i++) {
-		free(t.varlabels_glob[i]);
-		free(t.varvalues_glob[i]);
-	}
-	free(t.varlabels_glob);
-	free(t.varvalues_glob);
-}
-
-static void import_tab(FILE *fd)
-{
-	if (!fd) {
-		if (!(fd = tmpfile())) {
-			perror(NULL);
-			exit(errno);
-		}
-		if (cpfile(stdin, fd) < 0) {
+	if (tabf || errno != ENOENT) {
+		if (!tabf || !tmpf || cpfile(tabf, tmpf) < 0) {
 			perror(NULL);
 			exit(errno);
 		}
 	}
+	fflush(tmpf);
+	if (tabf)
+		fclose(tabf);
 
-	FILE *tabfd;
-	if (!(tabfd = fopen(tabpath, "w"))) {
-		perror(NULL);
-		exit(errno);
-	}
-	if (cpfile(fd, tabfd) < 0) {
-		perror(NULL);
-		exit(errno);
-	}
-
-	fclose(fd); /* note that this function closes fd */
-	fclose(tabfd);
-
-	install_tab();
-}
-
-static void edit_tab()
-{
-	if (!edit_file(tabpath)) {
+	if (edit_file(path))
+		_install_file(path);
+	else
 		print_info("no changes made\n");
-		return;
-	}
-	install_tab();
+
+	fclose(tmpf);
+	remove(path);
+	free(path);
 }
 
-static void list_tab()
+static void _list_tab()
 {
 	FILE *fd = fopen(tabpath, "r");
-	if (!fd && errno == ENOENT) {
+	if (!fd) {
 		if (errno == ENOENT)
 			print_err("user does not have a launchtab\n");
 		else
@@ -145,8 +123,19 @@ static void list_tab()
 	fclose(fd);
 }
 
-static void remove_tab()
+static void _remove_tab()
 {
+	/* Test if launch.tab exists */
+	FILE *tabf = fopen(tabpath, "r");
+	if (!tabf && errno == ENOENT) {
+		print_err("user does not have a launchtab\n");
+		exit(errno);
+	}
+	fclose(tabf);
+
+	struct tab t = read_tab(tabpath);
+	uninstall_tab(launchpath, &t);
+	free_tab(&t);
 	if (unlink(tabpath) < 0) {
 		perror(NULL);
 		exit(errno);
@@ -155,8 +144,7 @@ static void remove_tab()
 
 int main(int argc, char *argv[])
 {
-	char *home = getenv("HOME");
-
+	home = getenv("HOME");
 	if (!home) {
 		print_err("missing $HOME variable.\n");
 		exit(ENOENT);
@@ -189,29 +177,18 @@ int main(int argc, char *argv[])
 	argv = opts.argv;
 	debug = opts.debug;
 
-	FILE *fd;
 	switch (opts.op) {
 	case IMTAB:
-		if (argc > 0) {
-			fd = fopen(argv[0], "r");
-			if (!fd) {
-				print_err("%s: ", argv[0]);
-				perror(NULL);
-				exit(errno);
-			}
-		} else {
-			fd = NULL;
-		}
-		import_tab(fd);
+		_import_tab(argc > 0 ? argv[0] : NULL);
 		break;
 	case EDTAB:
-		edit_tab();
+		_edit_tab();
 		break;
 	case LSTAB:
-		list_tab();
+		_list_tab();
 		break;
 	case RMTAB:
-		remove_tab();
+		_remove_tab();
 		break;
 	default:
 		exit(EINVAL);
