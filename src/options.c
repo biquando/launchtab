@@ -17,7 +17,7 @@ static void usage(int err)
 		"        -e, --edit       edit user's launchtab\n"
 		"        -h, --help       show this message\n"
 		"        -l, --list       list user's launchtab\n"
-		"        -R, --reload     reload user's current tab\n"
+		"        -R, --reload     reload user's launchtab\n"
 		"        -r, --remove     remove user's launchtab\n"
 		);
 	exit(err);
