@@ -202,13 +202,11 @@ struct tab read_tab(char *path)
 {
 	struct tab t = {0};
 	FILE *f = fopen(path, "r");
-	if (!f) {
-		perror(NULL);
-		exit(errno);
+	if (f) {
+		lex_tab(f, &t);
+		fclose(f);
 	}
 
-	lex_tab(f, &t);
-	fclose(f);
 	return t;
 }
 

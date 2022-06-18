@@ -121,6 +121,9 @@ static void _list_tab()
 
 static void _remove_tab()
 {
+	struct tab t = read_tab(tabpath);
+	uninstall_tab(launchpath, &t);
+	free_tab(&t);
 	if (unlink(tabpath) < 0) {
 		perror(NULL);
 		exit(errno);
