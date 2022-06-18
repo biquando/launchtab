@@ -17,88 +17,26 @@ static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
 static void _install_tab()
 {
-	FILE *tabf = fopen(tabpath, "r");
-	if (!tabf) {
+	struct tab t = read_tab(tabpath);
+	install_tab(launchpath, &t);
+	free_tab(&t);
+}
+
+static void _import_tab(char *path)
+{
+	FILE *fd = path ? fopen(path, "r") : tmpfile();
+	if (!fd) {
 		perror(NULL);
 		exit(errno);
 	}
 
-	struct tab t = {0};
-	lex_tab(tabf, &t);
-	fclose(tabf);
-
-	/* Print rules */
-	if (debug) {
-		fprintf(stderr, "\n=================================\n\n");
-		for (int i = 0; i < t.nrules; i++) {
-			struct rule r = t.rules[i];
-			fprintf(stderr, "[%s]\n", r.id);
-			fprintf(stderr, "%s\n", r.command);
-			if (r.interval)
-				fprintf(stderr, "Interval: %s\n", r.interval);
-			for (int c = 0; c < r.ncals; c++) {
-				fprintf(stderr, "Calendar:");
-				for (int e = 0; e < 5; e++) {
-					fprintf(stderr, " %s", r.cal[c].ent[e]);
-				}
-				fprintf(stderr, "\n");
-			}
-			for (int v = 0; v < r.nvars; v++) {
-				fprintf(stderr, "Variable: %s = %s\n",
-						r.varlabels[v], r.varvalues[v]);
-			}
-			fprintf(stderr, "stdin: %s\n", r.fd[0]);
-			fprintf(stderr, "stdout: %s\n", r.fd[1]);
-			fprintf(stderr, "stderr: %s\n", r.fd[2]);
-			fprintf(stderr, "verbatim: %s\n", r.verbatim);
-		}
+	if (!path && cpfile(stdin, fd) < 0) {
+		perror(NULL);
+		exit(errno);
 	}
 
-	install_tab(launchpath, &t);
-
-	/* Free rules */
-	for (int i = 0; i < t.nrules; i++) {
-		struct rule r = t.rules[i];
-		free(r.id);
-		free(r.command);
-		free(r.cal);
-		for (int v = 0; v < r.nvars; v++) {
-			free(r.varlabels[v]);
-			free(r.varvalues[v]);
-		}
-		free(r.varlabels);
-		free(r.varvalues);
-		free(r.fd[0]);
-		free(r.fd[1]);
-		free(r.fd[2]);
-		free(r.verbatim);
-	}
-	free(t.rules);
-
-	/* Free global envars */
-	for (int i = 0; i < t.nvars_glob; i++) {
-		free(t.varlabels_glob[i]);
-		free(t.varvalues_glob[i]);
-	}
-	free(t.varlabels_glob);
-	free(t.varvalues_glob);
-}
-
-static void _import_tab(FILE *fd)
-{
-	if (!fd) {
-		if (!(fd = tmpfile())) {
-			perror(NULL);
-			exit(errno);
-		}
-		if (cpfile(stdin, fd) < 0) {
-			perror(NULL);
-			exit(errno);
-		}
-	}
-
-	FILE *tabfd;
-	if (!(tabfd = fopen(tabpath, "w"))) {
+	FILE *tabfd = fopen(tabpath, "w");
+	if (!tabfd) {
 		perror(NULL);
 		exit(errno);
 	}
@@ -107,7 +45,7 @@ static void _import_tab(FILE *fd)
 		exit(errno);
 	}
 
-	fclose(fd); /* note that this function closes fd */
+	fclose(fd);
 	fclose(tabfd);
 
 	_install_tab();
@@ -185,20 +123,9 @@ int main(int argc, char *argv[])
 	argv = opts.argv;
 	debug = opts.debug;
 
-	FILE *fd;
 	switch (opts.op) {
 	case IMTAB:
-		if (argc > 0) {
-			fd = fopen(argv[0], "r");
-			if (!fd) {
-				print_err("%s: ", argv[0]);
-				perror(NULL);
-				exit(errno);
-			}
-		} else {
-			fd = NULL;
-		}
-		_import_tab(fd);
+		_import_tab(argc > 0 ? argv[0] : NULL);
 		break;
 	case EDTAB:
 		_edit_tab();

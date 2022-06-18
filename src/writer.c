@@ -25,7 +25,7 @@ static const char *fdtype[3] = {
 	"Err"
 };
 
-int edit_file(const char *file)
+int edit_file(char *path)
 {
 	char *editor = getenv("EDITOR");
 	struct timespec oldtime = {0};
@@ -35,7 +35,7 @@ int edit_file(const char *file)
 	if (!editor)
 		editor = DEFAULT_EDITOR;
 
-	if (stat(file, &statbuf) == 0)
+	if (stat(path, &statbuf) == 0)
 		oldtime = statbuf.st_mtimespec;
 
 	pid_t child = fork();
@@ -44,7 +44,7 @@ int edit_file(const char *file)
 		exit(errno);
 	}
 	if (child == 0) {
-		execlp(editor, editor, file, NULL);
+		execlp(editor, editor, path, NULL);
 		perror(NULL);
 		exit(errno);
 	}
@@ -58,7 +58,7 @@ int edit_file(const char *file)
 		print_warn("%s exited abnormally\n", editor);
 	}
 
-	if (stat(file, &statbuf) == 0)
+	if (stat(path, &statbuf) == 0)
 		newtime = statbuf.st_mtimespec;
 
 	if (oldtime.tv_sec == newtime.tv_sec
@@ -198,6 +198,81 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 }
 
 
+struct tab read_tab(char *path)
+{
+	struct tab t = {0};
+	FILE *f = fopen(path, "r");
+	if (!f) {
+		perror(NULL);
+		exit(errno);
+	}
+
+	lex_tab(f, &t);
+	fclose(f);
+	return t;
+}
+
+void debug_tab(struct tab *t)
+{
+	/* Print rules */
+	if (debug) {
+		fprintf(stderr, "\n=================================\n\n");
+		for (int i = 0; i < t->nrules; i++) {
+			struct rule r = t->rules[i];
+			fprintf(stderr, "[%s]\n", r.id);
+			fprintf(stderr, "%s\n", r.command);
+			if (r.interval)
+				fprintf(stderr, "Interval: %s\n", r.interval);
+			for (int c = 0; c < r.ncals; c++) {
+				fprintf(stderr, "Calendar:");
+				for (int e = 0; e < 5; e++) {
+					fprintf(stderr, " %s", r.cal[c].ent[e]);
+				}
+				fprintf(stderr, "\n");
+			}
+			for (int v = 0; v < r.nvars; v++) {
+				fprintf(stderr, "Variable: %s = %s\n",
+						r.varlabels[v], r.varvalues[v]);
+			}
+			fprintf(stderr, "stdin: %s\n", r.fd[0]);
+			fprintf(stderr, "stdout: %s\n", r.fd[1]);
+			fprintf(stderr, "stderr: %s\n", r.fd[2]);
+			fprintf(stderr, "verbatim: %s\n", r.verbatim);
+		}
+	}
+
+}
+
+void free_tab(struct tab *t)
+{
+	/* Free rules */
+	for (int i = 0; i < t->nrules; i++) {
+		struct rule r = t->rules[i];
+		free(r.id);
+		free(r.command);
+		free(r.cal);
+		for (int v = 0; v < r.nvars; v++) {
+			free(r.varlabels[v]);
+			free(r.varvalues[v]);
+		}
+		free(r.varlabels);
+		free(r.varvalues);
+		free(r.fd[0]);
+		free(r.fd[1]);
+		free(r.fd[2]);
+		free(r.verbatim);
+	}
+	free(t->rules);
+
+	/* Free global envars */
+	for (int i = 0; i < t->nvars_glob; i++) {
+		free(t->varlabels_glob[i]);
+		free(t->varvalues_glob[i]);
+	}
+	free(t->varlabels_glob);
+	free(t->varvalues_glob);
+}
+
 void uninstall_tab(char *launchpath, struct tab *t)
 {
 	/* TODO: unload rules */
@@ -218,6 +293,7 @@ void uninstall_tab(char *launchpath, struct tab *t)
 
 void install_tab(char *launchpath, struct tab *t)
 {
+	debug_tab(t);
 	for (int i = 0; i < t->nrules; i++) {
 		struct rule *r = &t->rules[i];
 		char *plist = str_append(NULL, launchpath);

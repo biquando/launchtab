@@ -4,9 +4,12 @@
 #include <stdio.h>
 #include "launchtab.h"
 
-int edit_file(const char *file);
+int edit_file(char *path);
 void write_plist(char *path, struct tab *t, struct rule *r);
 
+struct tab read_tab(char *path);
+void free_tab(struct tab *t);
+void debug_tab(struct tab *t);
 void uninstall_tab(char *launchpath, struct tab *t);
 void install_tab(char *launchpath, struct tab *t);
 
