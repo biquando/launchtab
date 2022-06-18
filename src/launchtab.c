@@ -12,52 +12,92 @@
 
 int debug;
 int quiet = 0;
+static char *home;        /*  ~                               */
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
-static void _install_tab()
+static void _install_file(char *path)
 {
-	struct tab t = read_tab(tabpath);
-	install_tab(launchpath, &t);
-	free_tab(&t);
+	/* Read new */
+	struct tab newtab = read_tab(path);
+
+	/* Check vaildity */
+	if (newtab.invalid) {
+		print_err("Aborting. Check %s\n", path);
+		exit(EINVAL);
+	}
+
+	/* Read old */
+	struct tab oldtab = read_tab(tabpath);
+
+	/* Copy file */
+	FILE *newfile = fopen(path, "r");
+	FILE *oldfile = fopen(tabpath, "w");
+	if (!newfile || !oldfile || cpfile(newfile, oldfile) < 0) {
+		perror(NULL);
+		exit(errno);
+	}
+	fclose(newfile);
+	fclose(oldfile);
+
+	/* Uninstall old */
+	uninstall_tab(launchpath, &oldtab);
+
+	/* Install new */
+	install_tab(launchpath, &newtab);
+
+	/* Free tabs */
+	free_tab(&oldtab);
+	free_tab(&newtab);
 }
 
 static void _import_tab(char *path)
 {
-	FILE *fd = path ? fopen(path, "r") : tmpfile();
-	if (!fd) {
-		perror(NULL);
-		exit(errno);
+	FILE *tmpf = NULL;
+
+	if (!path) {
+		path = str_append(NULL, home);
+		path = str_append(path, "/.config/launchtab/temp.XXXX");
+		path = mktemp(path);
+		tmpf = fopen(path, "w");
+		if (!tmpf || cpfile(stdin, tmpf) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+		fflush(tmpf);
 	}
 
-	if (!path && cpfile(stdin, fd) < 0) {
-		perror(NULL);
-		exit(errno);
-	}
+	_install_file(path);
 
-	FILE *tabfd = fopen(tabpath, "w");
-	if (!tabfd) {
-		perror(NULL);
-		exit(errno);
+	if (tmpf) {
+		fclose(tmpf);
+		remove(path);
+		free(path);
 	}
-	if (cpfile(fd, tabfd) < 0) {
-		perror(NULL);
-		exit(errno);
-	}
-
-	fclose(fd);
-	fclose(tabfd);
-
-	_install_tab();
 }
 
 static void _edit_tab()
 {
-	if (!edit_file(tabpath)) {
-		print_info("no changes made\n");
-		return;
+	char *path = str_append(NULL, home);
+	path = str_append(path, "/.config/launchtab/temp.XXXX");
+	path = mktemp(path);
+	FILE *tmpf = fopen(path, "w");
+	FILE *tabf = fopen(tabpath, "r");
+	if (!tabf || !tmpf || cpfile(tabf, tmpf) < 0) {
+		perror(NULL);
+		exit(errno);
 	}
-	_install_tab();
+	fflush(tmpf);
+	fclose(tabf);
+
+	if (edit_file(path))
+		_install_file(path);
+	else
+		print_info("no changes made\n");
+
+	fclose(tmpf);
+	remove(path);
+	free(path);
 }
 
 static void _list_tab()
@@ -89,8 +129,7 @@ static void _remove_tab()
 
 int main(int argc, char *argv[])
 {
-	char *home = getenv("HOME");
-
+	home = getenv("HOME");
 	if (!home) {
 		print_err("missing $HOME variable.\n");
 		exit(ENOENT);

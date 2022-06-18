@@ -214,33 +214,36 @@ struct tab read_tab(char *path)
 
 void debug_tab(struct tab *t)
 {
-	/* Print rules */
-	if (debug) {
-		fprintf(stderr, "\n=================================\n\n");
-		for (int i = 0; i < t->nrules; i++) {
-			struct rule r = t->rules[i];
-			fprintf(stderr, "[%s]\n", r.id);
-			fprintf(stderr, "%s\n", r.command);
-			if (r.interval)
-				fprintf(stderr, "Interval: %s\n", r.interval);
-			for (int c = 0; c < r.ncals; c++) {
-				fprintf(stderr, "Calendar:");
-				for (int e = 0; e < 5; e++) {
-					fprintf(stderr, " %s", r.cal[c].ent[e]);
-				}
-				fprintf(stderr, "\n");
-			}
-			for (int v = 0; v < r.nvars; v++) {
-				fprintf(stderr, "Variable: %s = %s\n",
-						r.varlabels[v], r.varvalues[v]);
-			}
-			fprintf(stderr, "stdin: %s\n", r.fd[0]);
-			fprintf(stderr, "stdout: %s\n", r.fd[1]);
-			fprintf(stderr, "stderr: %s\n", r.fd[2]);
-			fprintf(stderr, "verbatim: %s\n", r.verbatim);
-		}
-	}
+	if (!debug)
+		return;
 
+	fprintf(stderr, "\n=================================\n\n");
+	for (int v = 0; v < t->nvars_glob; v++) {
+		fprintf(stderr, "Global: %s = %s\n",
+				t->varlabels_glob[v], t->varvalues_glob[v]);
+	}
+	for (int i = 0; i < t->nrules; i++) {
+		struct rule r = t->rules[i];
+		fprintf(stderr, "[%s]\n", r.id);
+		fprintf(stderr, "%s\n", r.command);
+		if (r.interval)
+			fprintf(stderr, "Interval: %s\n", r.interval);
+		for (int c = 0; c < r.ncals; c++) {
+			fprintf(stderr, "Calendar:");
+			for (int e = 0; e < 5; e++) {
+				fprintf(stderr, " %s", r.cal[c].ent[e]);
+			}
+			fprintf(stderr, "\n");
+		}
+		for (int v = 0; v < r.nvars; v++) {
+			fprintf(stderr, "Variable: %s = %s\n",
+					r.varlabels[v], r.varvalues[v]);
+		}
+		fprintf(stderr, "stdin: %s\n", r.fd[0]);
+		fprintf(stderr, "stdout: %s\n", r.fd[1]);
+		fprintf(stderr, "stderr: %s\n", r.fd[2]);
+		fprintf(stderr, "verbatim: %s\n", r.verbatim);
+	}
 }
 
 void free_tab(struct tab *t)
