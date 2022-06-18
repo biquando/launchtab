@@ -14,3 +14,6 @@ LaunchTab supports most features of crontab. Currently not supported:
 - `%` interpreted as newline
 - `@AppleNotOnBattery` prefix
 - `@reboot` special calendar entry
+
+## Limitations
+- System launchtabs are not supported. A user can only modify their own config.
