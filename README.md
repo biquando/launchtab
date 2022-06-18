@@ -16,9 +16,6 @@ LaunchTab supports most features of crontab. Currently not supported:
 - `@reboot` special calendar entry
 
 ## Limitations
-- When you install a launchtab, it creates .plist files in
-	`~/Library/LaunchAgents`. When you remove rules from your launchtab, it does
-	not remove the corresponding plists.
 - The plists are not automatically loaded/unloaded, so you need to do this
 	manually or logout and log back in for your changes to take effect. I've
 	included a shell script `bin/ltreload` to help you reload your plists.
