@@ -266,6 +266,6 @@ void handle_unknownOpt(struct tab *t)
 
 void handle_invalid(struct tab *t)
 {
-	print_errl("invalid token\n", yylineno - 1);
+	print_errl("invalid token\n", yylineno);
 	t->invalid = 1;
 }
