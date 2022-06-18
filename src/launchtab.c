@@ -123,6 +123,25 @@ static void _list_tab()
 	fclose(fd);
 }
 
+static void _reload_tab()
+{
+	/* Only need to open file to check if launch.tab exists */
+	FILE *fd = fopen(tabpath, "r");
+	if (!fd) {
+		if (errno == ENOENT)
+			print_err("user does not have a launchtab\n");
+		else
+			perror(NULL);
+		exit(errno);
+	}
+	fclose(fd);
+
+	struct tab t = read_tab(tabpath);
+	uninstall_tab(launchpath, &t);
+	install_tab(launchpath, &t);
+	free_tab(&t);
+}
+
 static void _remove_tab()
 {
 	/* Test if launch.tab exists */
@@ -186,6 +205,9 @@ int main(int argc, char *argv[])
 		break;
 	case LSTAB:
 		_list_tab();
+		break;
+	case RETAB:
+		_reload_tab();
 		break;
 	case RMTAB:
 		_remove_tab();
