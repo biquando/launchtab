@@ -83,12 +83,16 @@ static void _edit_tab()
 	path = mktemp(path);
 	FILE *tmpf = fopen(path, "w");
 	FILE *tabf = fopen(tabpath, "r");
-	if (!tabf || !tmpf || cpfile(tabf, tmpf) < 0) {
-		perror(NULL);
-		exit(errno);
+
+	if (tabf || errno != ENOENT) {
+		if (!tabf || !tmpf || cpfile(tabf, tmpf) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
 	}
 	fflush(tmpf);
-	fclose(tabf);
+	if (tabf)
+		fclose(tabf);
 
 	if (edit_file(path))
 		_install_file(path);
@@ -103,7 +107,7 @@ static void _edit_tab()
 static void _list_tab()
 {
 	FILE *fd = fopen(tabpath, "r");
-	if (!fd && errno == ENOENT) {
+	if (!fd) {
 		if (errno == ENOENT)
 			print_err("user does not have a launchtab\n");
 		else
@@ -121,6 +125,14 @@ static void _list_tab()
 
 static void _remove_tab()
 {
+	/* Test if launch.tab exists */
+	FILE *tabf = fopen(tabpath, "r");
+	if (!tabf && errno == ENOENT) {
+		print_err("user does not have a launchtab\n");
+		exit(errno);
+	}
+	fclose(tabf);
+
 	struct tab t = read_tab(tabpath);
 	uninstall_tab(launchpath, &t);
 	free_tab(&t);
