@@ -77,7 +77,7 @@ static char *parse_value(char *value)
 }
 
 static void parse_envar(char *text, char ***labs_p, char ***vals_p,
-		unsigned int *nvar_p)
+		unsigned int *nvars_p)
 {
 	char *label = text;
 	char *value = text;
@@ -91,14 +91,14 @@ static void parse_envar(char *text, char ***labs_p, char ***vals_p,
 	int label_len = strlen(label);
 	int value_len = strlen(value);
 
-	(*nvar_p)++;
-	*labs_p = try_realloc(*labs_p, *nvar_p * sizeof **labs_p);
-	*vals_p = try_realloc(*vals_p, *nvar_p * sizeof **vals_p);
+	(*nvars_p)++;
+	*labs_p = try_realloc(*labs_p, *nvars_p * sizeof **labs_p);
+	*vals_p = try_realloc(*vals_p, *nvars_p * sizeof **vals_p);
 
-	(*labs_p)[*nvar_p - 1] = try_malloc(label_len);
-	(*vals_p)[*nvar_p - 1] = try_malloc(value_len);
-	strcpy((*labs_p)[*nvar_p - 1], label);
-	strcpy((*vals_p)[*nvar_p - 1], value);
+	(*labs_p)[*nvars_p - 1] = try_malloc(label_len);
+	(*vals_p)[*nvars_p - 1] = try_malloc(value_len);
+	strcpy((*labs_p)[*nvars_p - 1], label);
+	strcpy((*vals_p)[*nvars_p - 1], value);
 }
 
 

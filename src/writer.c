@@ -304,12 +304,44 @@ void uninstall_tab(char *launchpath, struct tab *t)
 	}
 }
 
+static void default_envar(struct tab *t, char *label, char *value)
+{
+	if (!value)
+		return;
+
+	/* Don't overwrite if already set */
+	for (int i = 0; i < t->nvars_glob; i++) {
+		if (strcmp(label, t->varlabels_glob[i]) == 0)
+			return;
+	}
+
+	char ***labs_p = &t->varlabels_glob;
+	char ***vals_p = &t->varvalues_glob;
+	unsigned int *nvars_p = &t->nvars_glob;
+
+	int label_len = strlen(label);
+	int value_len = strlen(value);
+
+	(*nvars_p)++;
+	*labs_p = try_realloc(*labs_p, *nvars_p * sizeof **labs_p);
+	*vals_p = try_realloc(*vals_p, *nvars_p * sizeof **vals_p);
+
+	(*labs_p)[*nvars_p - 1] = try_malloc(label_len);
+	(*vals_p)[*nvars_p - 1] = try_malloc(value_len);
+	strcpy((*labs_p)[*nvars_p - 1], label);
+	strcpy((*vals_p)[*nvars_p - 1], value);
+}
+
 static char *load_str =
-"\nlaunchctl load \"$HOME/Library/LaunchAgents/$LID.plist\"";
+"\n1>&- 2>&- launchctl load \"$HOME/Library/LaunchAgents/$LID.plist\"";
 
 void install_tab(char *launchpath, struct tab *t)
 {
 	debug_tab(t);
+
+	/* Add default environment variables */
+	default_envar(t, "HOME", getenv("HOME"));
+
 	for (int i = 0; i < t->nrules; i++) {
 		struct rule *r = &t->rules[i];
 
