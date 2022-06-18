@@ -14,8 +14,3 @@ LaunchTab supports most features of crontab. Currently not supported:
 - `%` interpreted as newline
 - `@AppleNotOnBattery` prefix
 - `@reboot` special calendar entry
-
-## Limitations
-- The plists are not automatically loaded/unloaded, so you need to do this
-	manually or logout and log back in for your changes to take effect. I've
-	included a shell script `bin/ltreload` to help you reload your plists.
