@@ -66,6 +66,7 @@ int yywrap(void)
 void lex_tab(FILE *f, struct tab *t)
 {
 	yyin = f;
+	yylineno = 1;
 	curr_tab = t;
 	BEGIN INISC;
 	yylex();

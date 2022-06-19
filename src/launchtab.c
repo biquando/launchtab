@@ -28,7 +28,9 @@ static void _install_file(char *path)
 	}
 
 	/* Read old */
+	quiet = 1;
 	struct tab oldtab = read_tab(tabpath);
+	quiet = 0;
 
 	/* Copy file */
 	FILE *newfile = fopen(path, "r");
