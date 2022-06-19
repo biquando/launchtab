@@ -275,7 +275,7 @@ void free_tab(struct tab *t)
 }
 
 static char *unload_str =
-"\n[ -z \"$LID\" ] ||"
+"'\n[ -z \"$LID\" ] ||"
 " launchctl unload \"$HOME/Library/LaunchAgents/$LID.plist\" 2>&1 |"
 " grep -q '^Unload failed' &&"
 " 1>&- 2>&- launchctl bootout \"gui/$UID/$LID\"";
@@ -286,7 +286,7 @@ void uninstall_tab(char *launchpath, struct tab *t)
 		struct rule *r = &t->rules[i];
 
 		/* Unload rules */
-		char *unload = str_append(NULL, "LID=");
+		char *unload = str_append(NULL, "LID='");
 		unload = str_append(unload, r->id);
 		unload = str_append(unload, unload_str);
 		system(unload);
@@ -333,7 +333,7 @@ static void default_envar(struct tab *t, char *label, char *value)
 }
 
 static char *load_str =
-"\n1>&- 2>&- launchctl load \"$HOME/Library/LaunchAgents/$LID.plist\"";
+"'\n1>&- 2>&- launchctl load \"$HOME/Library/LaunchAgents/$LID.plist\"";
 
 void install_tab(char *launchpath, struct tab *t)
 {
@@ -353,7 +353,7 @@ void install_tab(char *launchpath, struct tab *t)
 		write_plist(plist, t, r);
 
 		/* Load rules */
-		char *load = str_append(NULL, "LID=");
+		char *load = str_append(NULL, "LID='");
 		load = str_append(load, r->id);
 		load = str_append(load, load_str);
 		system(load);

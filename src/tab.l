@@ -6,7 +6,7 @@ static struct tab *curr_tab;
 
 comment        ^{spc}?#.*{eol}
 cronRule       ^{spc}?(({calEntry}{spc}){5}|{specialCal}{spc}).+{eol}
-id             ^{spc}?\[.+\]{eol}
+id             ^{spc}?\[[.@_\-0-9A-Za-z]+\]{eol}
 emptyLine      ^{spc}?{eol}
 commandMulti   ^{spc}?.*\\{eol}
 command        ^{spc}?.*{eol}
