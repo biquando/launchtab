@@ -297,7 +297,7 @@ void uninstall_tab(char *launchpath, struct tab *t)
 		plist = str_append(plist, "/");
 		plist = str_append(plist, r->id);
 		plist = str_append(plist, ".plist");
-		if (unlink(plist) < 0) {
+		if (unlink(plist) < 0 && errno != ENOENT) {
 			perror(NULL);
 			exit(errno);
 		}
