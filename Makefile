@@ -16,7 +16,6 @@ all: bin/launchtab
 bin/launchtab: $(LEXFILE).yy.o $(OBJ)
 	mkdir -p bin
 	$(LD) -o $@ $(LDFLAGS) $^
-	cp ltreload bin
 
 $(LEXFILE).yy.o: $(LEXFILE).yy.c
 	$(CC) -o $@ -c $<
