@@ -149,7 +149,7 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 	}
 
 	/* Environment variables */
-	if (r->nvars > 0) {
+	if (r->nvars > 0 || t->nvars_glob > 0) {
 		fprintf(f,
 			"    <key>EnvironmentVariables</key>\n"
 			"    <dict>\n");
@@ -172,7 +172,7 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 			"        <string>%s</string>\n",
 			r->varlabels[v], r->varvalues[v]);
 	}
-	if (r->nvars > 0)
+	if (r->nvars > 0 || t->nvars_glob > 0)
 		fprintf(f, "    </dict>\n");
 
 	/* File descriptors */
