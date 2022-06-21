@@ -10,6 +10,7 @@ struct taboptions {
 	char **argv;
 	enum tabop op;
 	int debug;
+	int quiet;
 };
 
 struct taboptions parseopts(int argc, char *argv[]);

@@ -11,7 +11,7 @@
 #include "writer.h"
 
 int debug;
-int quiet = 0;
+int quiet;
 static char *home;        /*  ~                               */
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
@@ -28,9 +28,10 @@ static void _install_file(char *path)
 	}
 
 	/* Read old */
+	int quiet_tmp = quiet;
 	quiet = 1;
 	struct tab oldtab = read_tab(tabpath);
-	quiet = 0;
+	quiet = quiet_tmp;
 
 	/* Copy file */
 	FILE *newfile = fopen(path, "r");
@@ -193,10 +194,12 @@ int main(int argc, char *argv[])
 	}
 	tabpath[tabdirlen] = tmpc;
 
+	/* Read options */
 	struct taboptions opts = parseopts(argc, argv);
 	argc = opts.argc;
 	argv = opts.argv;
 	debug = opts.debug;
+	quiet = opts.quiet;
 
 	switch (opts.op) {
 	case IMTAB:

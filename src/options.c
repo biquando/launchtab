@@ -6,19 +6,21 @@
 #include "options.h"
 #include "util.h"
 
-#define OPTSTR "dehlRr"
+#define OPTSTR "dehlqRr"
 
 static void usage(int err)
 {
 	fprintf(stderr,
-		"usage:  launchtab [ -d ] [ file ]\n"
-		"        launchtab [ -d ] { -e | -h | -l | -R | -r }\n"
-		"        -d, --debug      show debug messages when installing\n"
-		"        -e, --edit       edit user's launchtab\n"
-		"        -h, --help       show this message\n"
-		"        -l, --list       list user's launchtab\n"
-		"        -R, --reload     reload user's launchtab\n"
-		"        -r, --remove     remove user's launchtab\n"
+"usage:  launchtab [ -dq ] [ file ]\n"
+"        launchtab [ -dq ] { -e | -h | -l | -R | -r }\n"
+"        -d, --debug      show debug messages when installing\n"
+"        -e, --edit       edit user's launchtab\n"
+"        -h, --help       show this message\n"
+"        -l, --list       list user's launchtab\n"
+"        -q, --quiet      suppress output to stdout/stderr (doesn't affect\n"
+"                         output from -d)\n"
+"        -R, --reload     reload user's launchtab\n"
+"        -r, --remove     remove user's launchtab\n"
 		);
 	exit(err);
 }
@@ -42,6 +44,7 @@ struct taboptions parseopts(int argc, char *argv[])
 		{ "edit",   no_argument, NULL, 'e' },
 		{ "help",   no_argument, NULL, 'h' },
 		{ "list",   no_argument, NULL, 'l' },
+		{ "quiet",  no_argument, NULL, 'q' },
 		{ "reload", no_argument, NULL, 'R' },
 		{ "remove", no_argument, NULL, 'r' },
 		{ NULL,     0,           NULL, 0 }
@@ -60,6 +63,9 @@ struct taboptions parseopts(int argc, char *argv[])
 			break;
 		case 'l':
 			setop(&opts, LSTAB);
+			break;
+		case 'q':
+			opts.quiet = 1;
 			break;
 		case 'R':
 			setop(&opts, RETAB);
