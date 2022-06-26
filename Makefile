@@ -27,5 +27,5 @@ $(LEXFILE).yy.c: $(LEXFILE).l
 	$(LEX) -o $@ --header-file=$(LEXFILE).yy.h --yylineno $<
 
 clean:
-	rm -f $(OBJ) $(LEXFILE).yy.* bin/*
+	rm -f $(OBJ) bin/*
 	rm -df bin
