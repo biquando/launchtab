@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "launchtab.h"
 #include "style.h"
 #include "util.h"

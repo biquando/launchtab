@@ -3,9 +3,6 @@
 
 #include <stdio.h>
 
-#define DEFAULT_EDITOR "nano"
-#define DEFAULT_SHELL "/bin/sh"
-
 struct calendar {
 	char *ent[5];
 };
