@@ -23,7 +23,7 @@ $(LEXFILE).yy.o: $(LEXFILE).yy.c
 %.o: %.c
 	$(CC) -o $@ $(CFLAGS) -c $<
 
-$(LEXFILE).yy.c: $(LEXFILE).l
+$(LEXFILE).yy.c: $(LEXFILE).l src/launchtab.h
 	$(LEX) -o $@ --header-file=$(LEXFILE).yy.h --yylineno $<
 
 clean:

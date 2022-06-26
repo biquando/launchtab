@@ -11,16 +11,20 @@
 static void usage(int err)
 {
 	fprintf(stderr,
-"usage:  launchtab [ -dq ] [ file ]\n"
-"        launchtab [ -dq ] { -e | -h | -l | -R | -r }\n"
-"        -d, --debug      show debug messages when installing\n"
-"        -e, --edit       edit user's launchtab\n"
-"        -h, --help       show this message\n"
-"        -l, --list       list user's launchtab\n"
-"        -q, --quiet      suppress output to stdout/stderr (doesn't affect\n"
-"                         output from -d)\n"
-"        -R, --reload     reload user's launchtab\n"
-"        -r, --remove     remove user's launchtab\n"
+"Usage:  launchtab [ OPTIONS ] [ file ]\n"
+"        launchtab [ OPTIONS ] { -e | -h | -l | -R | -r }\n"
+"\n"
+"Operations\n"
+"  -e, --edit       edit user's launchtab\n"
+"  -h, --help       show this message\n"
+"  -l, --list       list user's launchtab\n"
+"  -R, --reload     reload user's launchtab\n"
+"  -r, --remove     remove user's launchtab\n"
+"\n"
+"Options\n"
+"  -d, --debug      show debug messages when installing\n"
+"  -q, --quiet      suppress output to stdout/stderr (doesn't affect\n"
+"                   output from -d)\n"
 		);
 	exit(err);
 }
