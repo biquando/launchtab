@@ -201,7 +201,6 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 
 int rm_temps(char *dirname, char *tmpname)
 {
-	printf("rm_temps: %s, %s\n", dirname, tmpname);
 	/* Get template from tmpname */
 	int template_len = strlen(tmpname);
 	int num_Xs = 0;
@@ -224,7 +223,6 @@ int rm_temps(char *dirname, char *tmpname)
 		char *fname = str_append(NULL, dirname);
 		fname = str_append(fname, "/");
 		fname = str_append(fname, ent->d_name);
-		printf("fname: %s\n", fname);
 		if (template_len == strlen(ent->d_name)
 				&& strncmp(tmpname, ent->d_name, base_len) == 0)
 			err |= remove(fname);
