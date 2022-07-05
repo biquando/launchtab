@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "launchtab.h"
 #include "options.h"
 #include "style.h"
@@ -60,7 +61,7 @@ static void _import_tab(char *path)
 
 	if (!path) {
 		path = str_append(NULL, home);
-		path = str_append(path, "/.config/launchtab/temp.XXXX");
+		path = str_append(path, "/.config/launchtab/"TEMP_TEMPLATE);
 		path = mktemp(path);
 		tmpf = fopen(path, "w");
 		if (!tmpf || cpfile(stdin, tmpf) < 0) {
@@ -82,7 +83,7 @@ static void _import_tab(char *path)
 static void _edit_tab()
 {
 	char *path = str_append(NULL, home);
-	path = str_append(path, "/.config/launchtab/temp.XXXX");
+	path = str_append(path, "/.config/launchtab/"TEMP_TEMPLATE);
 	path = mktemp(path);
 	FILE *tmpf = fopen(path, "w");
 	FILE *tabf = fopen(tabpath, "r");
@@ -201,6 +202,7 @@ int main(int argc, char *argv[])
 	debug = opts.debug;
 	quiet = opts.quiet;
 
+	char *tmps;
 	switch (opts.op) {
 	case IMTAB:
 		_import_tab(argc > 0 ? argv[0] : NULL);
@@ -216,6 +218,13 @@ int main(int argc, char *argv[])
 		break;
 	case RMTAB:
 		_remove_tab();
+		break;
+	case CLEAN:
+		tmps = str_append(NULL, tabpath);
+		tmps[dirname(tmps, NULL)] = '\0';
+		if (rm_temps(tmps, TEMP_TEMPLATE) < 0)
+			exit(1);
+		free(tmps);
 		break;
 	default:
 		exit(EINVAL);

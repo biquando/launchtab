@@ -20,4 +20,6 @@
 #define DEFAULT_EDITOR "nano"
 #define DEFAULT_SHELL "/bin/sh"
 
+#define TEMP_TEMPLATE "temp.XXXX"
+
 #endif

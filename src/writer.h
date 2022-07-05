@@ -6,6 +6,7 @@
 
 int edit_file(char *path);
 void write_plist(char *path, struct tab *t, struct rule *r);
+int rm_temps(char *dir, char *tmpname);
 
 struct tab read_tab(char *path);
 void free_tab(struct tab *t);

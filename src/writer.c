@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -196,6 +197,43 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 	fclose(f);
 
 	print_info("Wrote rule: %s\n", r->id);
+}
+
+int rm_temps(char *dirname, char *tmpname)
+{
+	printf("rm_temps: %s, %s\n", dirname, tmpname);
+	/* Get template from tmpname */
+	int template_len = strlen(tmpname);
+	int num_Xs = 0;
+	for (int i = template_len - 1; i >= 0 && tmpname[i] == 'X'; i--) {
+		num_Xs++;
+	}
+	int base_len = template_len - num_Xs;
+
+	DIR *dirp = opendir(dirname);
+	if (!dirp)
+		return -1;
+
+	/* Search dir entries for files that fit the template */
+	int err = 0;
+	while (1) {
+		struct dirent *ent = readdir(dirp);
+		if (!ent)
+			break;
+
+		char *fname = str_append(NULL, dirname);
+		fname = str_append(fname, "/");
+		fname = str_append(fname, ent->d_name);
+		printf("fname: %s\n", fname);
+		if (template_len == strlen(ent->d_name)
+				&& strncmp(tmpname, ent->d_name, base_len) == 0)
+			err |= remove(fname);
+	}
+
+	if (closedir(dirp) < 0)
+		return -1;
+
+	return -1 * (err != 0);
 }
 
 
