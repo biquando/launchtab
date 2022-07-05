@@ -6,6 +6,7 @@
 "        launchtab [ OPTIONS ] { -e | -h | -l | -R | -r }\n"                   \
 "\n"                                                                           \
 "Operations\n"                                                                 \
+"  -c, --cleanup    clean up temp files\n"                                     \
 "  -e, --edit       edit user's launchtab\n"                                   \
 "  -h, --help       show this message\n"                                       \
 "  -l, --list       list user's launchtab\n"                                   \
