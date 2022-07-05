@@ -224,8 +224,10 @@ int rm_temps(char *dirname, char *tmpname)
 		fname = str_append(fname, "/");
 		fname = str_append(fname, ent->d_name);
 		if (template_len == strlen(ent->d_name)
-				&& strncmp(tmpname, ent->d_name, base_len) == 0)
+		&& strncmp(tmpname, ent->d_name, base_len) == 0) {
+			print_info("removing %s\n", fname);
 			err |= remove(fname);
+		}
 	}
 
 	if (closedir(dirp) < 0)
