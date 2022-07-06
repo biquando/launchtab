@@ -3,7 +3,7 @@
 
 #define USAGE_STR                                                              \
 "Usage:  launchtab [ OPTIONS ] [ file ]\n"                                     \
-"        launchtab [ OPTIONS ] { -e | -h | -l | -R | -r }\n"                   \
+"        launchtab [ OPTIONS ] { -c | -e | -h | -l | -R | -r }\n"              \
 "\n"                                                                           \
 "Operations\n"                                                                 \
 "  -c, --cleanup    clean up temp files\n"                                     \
