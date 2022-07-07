@@ -104,7 +104,7 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 		"    <array>\n"
 		"        <string>%s</string>\n"
 		"        <string>-c</string>\n"
-		"        <string>exec %s</string>\n"
+		"        <string>%s</string>\n"
 		"    </array>\n", shell, r->command ? r->command : "");
 
 	/* Interval */
