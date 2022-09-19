@@ -7,7 +7,7 @@
 #include "options.h"
 #include "util.h"
 
-#define OPTSTR "cdehlqRr"
+#define OPTSTR "bcdehlqRr"
 
 static void usage(int err)
 {
@@ -30,6 +30,7 @@ struct taboptions parseopts(int argc, char *argv[])
 	int c;
 
 	static struct option longopts[] = {
+		{ "backup",  no_argument, NULL, 'b' },
 		{ "cleanup", no_argument, NULL, 'c' },
 		{ "debug",   no_argument, NULL, 'd' },
 		{ "edit",    no_argument, NULL, 'e' },
@@ -43,6 +44,9 @@ struct taboptions parseopts(int argc, char *argv[])
 
 	while ((c = getopt_long(argc, argv, OPTSTR, longopts, NULL)) != -1) {
 		switch (c) {
+		case 'b':
+			setop(&opts, BCKUP);
+			break;
 		case 'c':
 			setop(&opts, CLEAN);
 			break;

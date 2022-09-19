@@ -2,7 +2,7 @@
 #define _LAUNCHTAB_OPTIONS_H
 
 enum tabop {
-	IMTAB=0, EDTAB, LSTAB, RETAB, RMTAB, CLEAN
+	IMTAB=0, EDTAB, LSTAB, RETAB, RMTAB, CLEAN, BCKUP
 };
 
 struct taboptions {

@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
 	quiet = opts.quiet;
 
 	char *tmps;
+	FILE *tmpf1, *tmpf2;
 	switch (opts.op) {
 	case IMTAB:
 		_import_tab(argc > 0 ? argv[0] : NULL);
@@ -225,6 +226,23 @@ int main(int argc, char *argv[])
 		if (rm_temps(tmps, TEMP_TEMPLATE) < 0)
 			exit(1);
 		free(tmps);
+		break;
+	case BCKUP:
+		tmpf1 = fopen(tabpath, "r");
+		if (!tmpf1 && errno == ENOENT) {
+			print_err("user does not have a launchtab\n");
+			exit(errno);
+		}
+
+		tmps = str_append(NULL, home);
+		tmps = str_append(tmps, DEFAULT_BACKUP);
+		tmpf2 = fopen(tmps, "w");
+		if (!tmpf1 || !tmpf2 || cpfile(tmpf1, tmpf2) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+		fclose(tmpf1);
+		fclose(tmpf2);
 		break;
 	default:
 		exit(EINVAL);
