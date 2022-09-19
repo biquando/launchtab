@@ -4,7 +4,7 @@
 #define USAGE_STR                                                              \
 "Usage:  launchtab [OPTION]... [FILE]\n"                                       \
 "  or:   launchtab [OPTION]... { -c | -e | -h | -l | -R | -r }\n"              \
-"  or:   launchtab [OPTION]... -b\n"                                           \
+"  or:   launchtab [OPTION]... -b [FILE]\n"                                    \
 "Create or configure a launchtab.\n"                                           \
 "\n"                                                                           \
 "Operations\n"                                                                 \

@@ -78,15 +78,16 @@ struct taboptions parseopts(int argc, char *argv[])
 	opts.argc = argc - optind;
 	opts.argv = argv + optind;
 
-	if (opts.op && opts.argc > 0) {
+	if (opts.op == IMTAB || opts.op == BCKUP) {
+		if (opts.argc > 1) {
+			print_err("only one FILE argument allowed\n");
+			usage(EINVAL);
+		}
+	} else if (opts.argc > 0) {
 		print_err("no arguments permitted after this option\n");
 		usage(EINVAL);
 	}
 
-	if (opts.argc > 1) {
-		print_err("only one file argument allowed\n");
-		usage(EINVAL);
-	}
 
 	return opts;
 }

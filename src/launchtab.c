@@ -234,8 +234,12 @@ int main(int argc, char *argv[])
 			exit(errno);
 		}
 
-		tmps = str_append(NULL, home);
-		tmps = str_append(tmps, DEFAULT_BACKUP);
+		if (argc) {
+			tmps = argv[0];
+		} else {
+			tmps = str_append(NULL, home);
+			tmps = str_append(tmps, DEFAULT_BACKUP);
+		}
 		tmpf2 = fopen(tmps, "w");
 		if (!tmpf1 || !tmpf2 || cpfile(tmpf1, tmpf2) < 0) {
 			perror(NULL);
