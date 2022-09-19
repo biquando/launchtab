@@ -17,6 +17,8 @@ static char *home;        /*  ~                               */
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
 static char *launchpath;  /*  ~/Library/LaunchAgents          */
 
+/* Install the file at `path` as a launchtab, automatically unloading old rules
+   and loading new rules. This function is not an operation. */
 static void _install_file(char *path)
 {
 	/* Read new */
@@ -55,6 +57,7 @@ static void _install_file(char *path)
 	free_tab(&newtab);
 }
 
+/* Handle `IMTAB` operation. If `path` is NULL, read from stdin. */
 static void _import_tab(char *path)
 {
 	FILE *tmpf = NULL;
@@ -165,6 +168,38 @@ static void _remove_tab()
 	}
 }
 
+static void _clean_tab()
+{
+		char *tabdir = str_append(NULL, tabpath);
+		tabdir[dirname(tabdir, NULL)] = '\0';
+		if (rm_temps(tabdir, TEMP_TEMPLATE) < 0)
+			exit(1);
+		free(tabdir);
+}
+
+static void _backup_tab(char *path)
+{
+		FILE *oldfile, *newfile;
+
+		oldfile = fopen(tabpath, "r");
+		if (!oldfile && errno == ENOENT) {
+			print_err("user does not have a launchtab\n");
+			exit(errno);
+		}
+
+		if (!path) {
+			path = str_append(NULL, home);
+			path = str_append(path, DEFAULT_BACKUP);
+		}
+		newfile = fopen(path, "w");
+		if (!oldfile || !newfile || cpfile(oldfile, newfile) < 0) {
+			perror(NULL);
+			exit(errno);
+		}
+		fclose(oldfile);
+		fclose(newfile);
+}
+
 int main(int argc, char *argv[])
 {
 	home = getenv("HOME");
@@ -202,8 +237,6 @@ int main(int argc, char *argv[])
 	debug = opts.debug;
 	quiet = opts.quiet;
 
-	char *tmps;
-	FILE *tmpf1, *tmpf2;
 	switch (opts.op) {
 	case IMTAB:
 		_import_tab(argc > 0 ? argv[0] : NULL);
@@ -221,32 +254,10 @@ int main(int argc, char *argv[])
 		_remove_tab();
 		break;
 	case CLEAN:
-		tmps = str_append(NULL, tabpath);
-		tmps[dirname(tmps, NULL)] = '\0';
-		if (rm_temps(tmps, TEMP_TEMPLATE) < 0)
-			exit(1);
-		free(tmps);
+		_clean_tab();
 		break;
 	case BCKUP:
-		tmpf1 = fopen(tabpath, "r");
-		if (!tmpf1 && errno == ENOENT) {
-			print_err("user does not have a launchtab\n");
-			exit(errno);
-		}
-
-		if (argc) {
-			tmps = argv[0];
-		} else {
-			tmps = str_append(NULL, home);
-			tmps = str_append(tmps, DEFAULT_BACKUP);
-		}
-		tmpf2 = fopen(tmps, "w");
-		if (!tmpf1 || !tmpf2 || cpfile(tmpf1, tmpf2) < 0) {
-			perror(NULL);
-			exit(errno);
-		}
-		fclose(tmpf1);
-		fclose(tmpf2);
+	 	_backup_tab(argc ? argv[0] : NULL);
 		break;
 	default:
 		exit(EINVAL);
