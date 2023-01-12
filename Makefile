@@ -3,18 +3,18 @@ LD = clang
 LEX = flex
 
 CFLAGS := $(CFLAGS) -Wall
-LDFLAGS :=
+LDFLAGS := $(LDFLAGS)
 
-SRC = $(wildcard src/*.c)
+LEXFILE = src/tab
+SRC = $(wildcard src/*.c) $(LEXFILE).yy.c
 OBJ = $(SRC:.c=.o)
 DEP = $(SRC:.c=.d)
-LEXFILE = src/tab
 
 .PHONY: all clean
 
 all: bin/launchtab
 
-bin/launchtab: $(LEXFILE).yy.o $(OBJ)
+bin/launchtab: $(OBJ)
 	mkdir -p bin
 	$(LD) -o $@ $(LDFLAGS) $^
 
@@ -23,10 +23,10 @@ bin/launchtab: $(LEXFILE).yy.o $(OBJ)
 %.o: %.c Makefile
 	$(CC) -o $@ $(CFLAGS) -MMD -MP -c $<
 
-$(LEXFILE).yy.o: $(LEXFILE).yy.c
-	$(CC) -o $@ -c $<
+$(LEXFILE).yy.o: $(LEXFILE).yy.c Makefile
+	$(CC) -o $@ -MMD -MP -c $<
 
-$(LEXFILE).yy.c: $(LEXFILE).l src/launchtab.h
+$(LEXFILE).yy.c: $(LEXFILE).l
 	$(LEX) -o $@ --header-file=$(LEXFILE).yy.h --yylineno $<
 
 clean:
