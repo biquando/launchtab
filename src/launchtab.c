@@ -32,9 +32,12 @@ static void _install_file(char *path)
 
 	/* Read old */
 	int quiet_tmp = quiet;
+	int debug_tmp = debug;
 	quiet = 1;
+	debug = 0;
 	struct tab oldtab = read_tab(tabpath);
 	quiet = quiet_tmp;
+	debug = debug_tmp;
 
 	/* Copy file */
 	FILE *newfile = fopen(path, "r");
