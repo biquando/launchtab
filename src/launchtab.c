@@ -196,6 +196,7 @@ static void _backup_tab(char *path)
 			perror(NULL);
 			exit(errno);
 		}
+		print_info("backed up to %s\n", path);
 		fclose(oldfile);
 		fclose(newfile);
 }
