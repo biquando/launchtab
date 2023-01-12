@@ -157,7 +157,17 @@ void handle_emptyLine(struct tab *t)
 	print_dbg("emptyLine: %s", yytext);
 }
 
-void handle_commandMulti(struct tab *t)
+void handle_commandStart(struct tab *t)
+{
+	print_dbg("commandStart: %s", yytext);
+}
+
+void handle_commandEnd(struct tab *t)
+{
+	print_dbg("commandEnd: %s", yytext);
+}
+
+void handle_commandCont(struct tab *t)
 {
 	handle_command(t);
 }
@@ -175,6 +185,13 @@ void handle_command(struct tab *t)
 	r->command = str_append(r->command, yytext);
 }
 
+void handle_commandMulti(struct tab *t)
+{
+	print_dbg("commandMulti: %s", yytext);
+	struct rule *r = &t->rules[t->nrules - 1];
+	r->command = str_append(r->command, yytext);
+	// r->command = str_append(r->command, "\n");
+}
 
 /* Options */
 

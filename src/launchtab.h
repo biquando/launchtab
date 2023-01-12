@@ -39,8 +39,12 @@ void handle_globEnvar(struct tab *t);
 void handle_id(struct tab *t);
 void handle_comment(struct tab *t);
 void handle_emptyLine(struct tab *t);
-void handle_commandMulti(struct tab *t);
+
+void handle_commandStart(struct tab *t);
+void handle_commandEnd(struct tab *t);
+void handle_commandCont(struct tab *t);
 void handle_command(struct tab *t);
+void handle_commandMulti(struct tab *t);
 
 void handle_interval(struct tab *t);
 void handle_calendar(struct tab *t);

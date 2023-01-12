@@ -216,8 +216,9 @@ extern char *yytext;
 #define INITIAL 0
 #define INISC 1
 #define COMSC 2
-#define OPTSC 3
-#define VERSC 4
+#define MULSC 3
+#define OPTSC 4
+#define VERSC 5
 
 #endif
 
@@ -471,9 +472,9 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 59 "src/tab.l"
+#line 66 "src/tab.l"
 
 
-#line 477 "src/tab.yy.h"
+#line 478 "src/tab.yy.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */
