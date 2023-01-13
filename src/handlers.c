@@ -9,7 +9,7 @@
 extern char *yytext;
 extern int yylineno;
 
-static struct rule *new_rule(struct tab *t)
+static struct rule *_new_rule(struct tab *t)
 {
 	t->nrules++;
 	t->rules = try_realloc(t->rules, t->nrules * sizeof *t->rules);
@@ -23,10 +23,10 @@ static struct rule *new_rule(struct tab *t)
 	} else if (strncmp(text, special, sizeof special - 1) == 0) { \
 		char *tmp = try_malloc(sizeof normal); \
 		strcpy(tmp, normal); \
-		add_calendar(tmp, r); \
+		_add_calendar(tmp, r); \
 		free(tmp); \
 		return text + sizeof special - 1
-static char *add_calendar(char *text, struct rule *r)
+static char *_add_calendar(char *text, struct rule *r)
 {
 	/* Check special calendar rules */
 	if (text[0] == '@') {
@@ -62,7 +62,7 @@ static char *add_calendar(char *text, struct rule *r)
 	return entry;
 }
 
-static char *parse_value(char *value)
+static char *_parse_value(char *value)
 {
 	value = trim(value);
 	int len = strlen(value);
@@ -76,7 +76,7 @@ static char *parse_value(char *value)
 	return value;
 }
 
-static void parse_envar(char *text, char ***labs_p, char ***vals_p,
+static void _parse_envar(char *text, char ***labs_p, char ***vals_p,
 		unsigned int *nvars_p)
 {
 	char *label = text;
@@ -86,7 +86,7 @@ static void parse_envar(char *text, char ***labs_p, char ***vals_p,
 	value++;
 
 	label = trim(label);
-	value = parse_value(value);
+	value = _parse_value(value);
 
 	int label_len = strlen(label);
 	int value_len = strlen(value);
@@ -101,36 +101,66 @@ static void parse_envar(char *text, char ***labs_p, char ***vals_p,
 	strcpy((*vals_p)[*nvars_p - 1], value);
 }
 
+static struct rule *_parse_cron_calendar(struct tab *t)
+{
+	struct rule *r = _new_rule(t);
+
+	size_t id_size = sizeof "cron.rule." + t->ncronrules/10 + 1;
+	r->id = try_malloc(id_size);
+	snprintf(r->id, id_size, "cron.rule.%u", t->ncronrules++);
+
+	yytext = _add_calendar(yytext, r);
+
+	/* The token should end with a newline. We remove the null byte added after
+	 * the last calendar entry by strtok when parsing the calendar. */
+	for (int i = 0; yytext[i] != '\n'; i++) {
+		if (yytext[i] == '\0') {
+			yytext[i] = ' ';
+			break;
+		}
+	}
+
+	return r;
+}
+
+void handle_cronRuleStart(struct tab *t)
+{
+	print_dbg("cronRuleStart: %s", yytext);
+	yytext = trim(yytext);
+
+	_parse_cron_calendar(t);
+}
+
+void handle_cronRuleEnd(struct tab *t)
+{
+	print_dbg("cronRuleEnd: %s", yytext);
+}
+
+void handle_cronRuleCont(struct tab *t)
+{
+	print_dbg("cronRuleCont: %s", yytext);
+	yytext = trim(yytext);
+
+	_parse_cron_calendar(t);
+	handle_commandCont(t);
+}
 
 void handle_cronRule(struct tab *t)
 {
 	print_dbg("cronRule: %s", yytext);
 	yytext = trim(yytext);
 
-	struct rule *r = new_rule(t);
-	r->id = try_malloc(sizeof "cron.rule." + t->ncronrules/10);
-	sprintf(r->id, "cron.rule.%u", t->ncronrules++);
+	struct rule *r = _parse_cron_calendar(t);
 
-	yytext = add_calendar(yytext, r);
-	if (yytext) {
-		/* The token should end with a newline */
-		for (int i = 0; yytext[i] != '\n'; i++) {
-			if (yytext[i] == '\0') {
-				yytext[i] = ' ';
-				break;
-			}
-		}
-
-		yytext = trim(yytext);
-		r->command = try_malloc(strlen(yytext) + 1);
-		strcpy(r->command, yytext);
-	}
+	yytext = trim(yytext);
+	r->command = try_malloc(strlen(yytext) + 1);
+	strcpy(r->command, yytext);
 }
 
 void handle_globEnvar(struct tab *t)
 {
 	print_dbg("globEnvar: %s", yytext);
-	parse_envar(yytext, &t->varlabels_glob, &t->varvalues_glob,
+	_parse_envar(yytext, &t->varlabels_glob, &t->varvalues_glob,
 			&t->nvars_glob);
 }
 
@@ -139,7 +169,7 @@ void handle_id(struct tab *t)
 	print_dbg("id: %s", yytext);
 	yytext = trim(yytext);
 
-	struct rule *r = new_rule(t);
+	struct rule *r = _new_rule(t);
 
 	int len = strlen(yytext);
 	yytext[len - 1] = '\0'; /* remove trailing ] */
@@ -190,7 +220,6 @@ void handle_commandMulti(struct tab *t)
 	print_dbg("commandMulti: %s", yytext);
 	struct rule *r = &t->rules[t->nrules - 1];
 	r->command = str_append(r->command, yytext);
-	// r->command = str_append(r->command, "\n");
 }
 
 /* Options */
@@ -212,14 +241,14 @@ void handle_calendar(struct tab *t)
 	print_dbg("calendar: %s", yytext);
 	yytext = trim(yytext);
 
-	add_calendar(yytext, &t->rules[t->nrules - 1]);
+	_add_calendar(yytext, &t->rules[t->nrules - 1]);
 }
 
 void handle_envar(struct tab *t)
 {
 	print_dbg("envar: %s", yytext);
 	struct rule *r = &t->rules[t->nrules - 1];
-	parse_envar(yytext, &r->varlabels, &r->varvalues, &r->nvars);
+	_parse_envar(yytext, &r->varlabels, &r->varvalues, &r->nvars);
 }
 
 void handle_stdin(struct tab *t)

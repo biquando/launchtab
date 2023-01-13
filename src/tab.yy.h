@@ -215,10 +215,12 @@ extern char *yytext;
 #ifdef YY_HEADER_EXPORT_START_CONDITIONS
 #define INITIAL 0
 #define INISC 1
-#define COMSC 2
-#define MULSC 3
-#define OPTSC 4
-#define VERSC 5
+#define CCOSC 2
+#define CMUSC 3
+#define COMSC 4
+#define MULSC 5
+#define OPTSC 6
+#define VERSC 7
 
 #endif
 
@@ -472,9 +474,9 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 66 "src/tab.l"
+#line 89 "src/tab.l"
 
 
-#line 478 "src/tab.yy.h"
+#line 480 "src/tab.yy.h"
 #undef yyIN_HEADER
 #endif /* yyHEADER_H */

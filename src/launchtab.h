@@ -34,6 +34,9 @@ struct tab {
 
 void lex_tab(FILE *f, struct tab *t);
 
+void handle_cronRuleStart(struct tab *t);
+void handle_cronRuleEnd(struct tab *t);
+void handle_cronRuleCont(struct tab *t);
 void handle_cronRule(struct tab *t);
 void handle_globEnvar(struct tab *t);
 void handle_id(struct tab *t);
