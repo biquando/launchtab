@@ -1,0 +1,30 @@
+# multiline.tab
+#
+# When specifying the command to run, you can use multiple lines using one of
+# two methods: line continuation or script.
+
+# Line continutation with a crontab rule
+* * * * * echo \
+	hello \
+	world
+
+# Script with a crontab rule
+* * * * * {
+echo hello
+echo world
+echo "This will all be run as a single script"
+}
+
+# Line continuation with a launchtab rule
+[com.multiline.continuation]
+echo hello \
+world && \
+echo bye
+
+# Script with a launchtab rule
+[com.multiline.script]
+{
+echo This is a script rule
+echo ':)' &&
+	echo ':('
+}

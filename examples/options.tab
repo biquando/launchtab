@@ -1,0 +1,38 @@
+# options.tab
+
+# Set global environment variables (apply to all rules)
+NAME = biquando
+
+# The SHELL environment variable specifies which shell to run each rule with
+# (defaults to /bin/sh)
+SHELL = /bin/bash
+
+# To use options, you must create a new launchtab rule.
+[com.options]
+echo "$NAME: $MSG"
+
+# Set a calendar interval
+# This uses the same syntax as crontab, see crontab(5)
+0,30 4 * * */3
+@annually
+
+# Run every 300 seconds
+Interval 300
+
+# Set environment variables
+MSG = hello, world!
+
+# Redirect stdout
+> "$HOME/Desktop/stdout.txt"
+
+# Redirect stdint
+< "$HOME/Desktop/stdin.txt"
+
+# Redirect stderr
+2> "$HOME/Desktop/stderr.txt"
+
+# Insert keys into the agent's plist verbatim, see launchd.plist(5)
+---
+<key>RunAtLoad</key>
+<true/>
+---

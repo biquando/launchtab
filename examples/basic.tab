@@ -1,0 +1,23 @@
+# basic.tab
+#
+# A basic launchtab config consits of a set of rules. Each rule is structured as
+# follows:
+# - id
+# - command to run
+# - options
+
+# id
+[com.basic.myrule1]
+
+# command
+touch "$HOME/Desktop/basic_example.txt"
+
+# options
+Interval 300
+
+
+[com.basic.timestamps]
+touch "$HOME/Desktop/$(date)"
+@hourly
+
+# see options.tab for a complete list of available options

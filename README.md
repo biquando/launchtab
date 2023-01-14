@@ -30,8 +30,8 @@ mv bin/launchtab ~/bin
 
 ## Making a launchtab config
 If you already have a crontab, you can import it with `crontab -l | launchtab`.
-You can also edit your launchtab directly with `launchtab -e`. See `example.tab`
-for an example launchtab. Run `launchtab --help` for usage information.
+You can also edit your launchtab directly with `launchtab -e`. See `examples/`
+for some example launchtabs. Run `launchtab --help` for usage information.
 
 LaunchTab supports most features of crontab. Currently not supported:
 - Passing text to stdin via `%`

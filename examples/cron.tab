@@ -1,0 +1,17 @@
+# cron.tab
+#
+# You can use crontab syntax directly in launchtab.
+
+# Set global environment variables (apply to all rules)
+FILE = "$HOME/Desktop/myfile.txt"
+
+# Normal calendar rules
+0,30 4 * * */3 date >>"$FILE"
+
+# Special calendar rules
+@annually date >>"$FILE" && echo "happy new year!" >>"$FILE"
+
+
+# You can use normal launchtab rules AFTER all of your crontab-style rules
+[com.cron.myrule]
+echo "normal rule" >>"$FILE"
