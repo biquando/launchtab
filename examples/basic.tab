@@ -1,10 +1,10 @@
 # basic.tab
 #
-# A basic launchtab config consits of a set of rules. Each rule is structured as
-# follows:
-# - id
-# - command to run
-# - options
+# A basic launchtab config consists of a set of rules. Each rule is structured
+# as follows:
+# 1. id
+# 2. command to run
+# 3. options
 
 # id
 [com.basic.myrule1]
