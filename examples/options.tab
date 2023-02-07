@@ -25,7 +25,7 @@ MSG = hello, world!
 # Redirect stdout
 > "$HOME/Desktop/stdout.txt"
 
-# Redirect stdint
+# Redirect stdin
 < "$HOME/Desktop/stdin.txt"
 
 # Redirect stderr
