@@ -91,6 +91,9 @@ void write_plist(char *path, struct tab *t, struct rule *r)
 	if (!shell)
 		shell = DEFAULT_SHELL;
 
+	/* Escape XML characters */
+	r->command = escape_xml(r->command);
+
 	fprintf(f,
 		"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 		"<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\"\n"

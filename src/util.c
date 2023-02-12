@@ -74,6 +74,43 @@ char *find_value(char *label, char **labels, char **values, unsigned int n)
 	return NULL;
 }
 
+/* Escapes an xml-style string. str must be reallocable. */
+char *escape_xml(char *str)
+{
+	int i, len = strlen(str);
+	for (i = len - 1; i >= 0; i--) {
+		char *replacement;
+		switch (str[i]) {
+		case '<':
+			replacement = "&lt;";
+			break;
+		case '>':
+			replacement = "&gt;";
+			break;
+		case '&':
+			replacement = "&amp;";
+			break;
+		case '\'':
+			replacement = "&apos;";
+			break;
+		case '"':
+			replacement = "&quot;";
+			break;
+		default:
+			replacement = NULL;
+		}
+
+		if (replacement) {
+			int repl_len = strlen(replacement);
+			str = try_realloc(str, len + repl_len);
+			memmove(&str[i + repl_len], &str[i + 1], len - i + 1);
+			memmove(&str[i], replacement, repl_len);
+			len = len + repl_len - 1;
+		}
+	}
+	return str;
+}
+
 
 int mkdir_p(const char *path)
 {

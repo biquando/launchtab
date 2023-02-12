@@ -12,6 +12,7 @@ char *trim_trailing(char *str);
 char *trim(char *str);
 char *str_append(char *str1, char *str2);
 char *find_value(char *label, char **labels, char **values, unsigned int n);
+char *escape_xml(char *str);
 
 int mkdir_p(const char *path);
 size_t dirname(const char *path, char *output);
