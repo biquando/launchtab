@@ -247,6 +247,9 @@ struct tab read_tab(char *path)
 	if (f) {
 		lex_tab(f, &t);
 		fclose(f);
+	} else {
+		perror(NULL);
+		exit(errno);
 	}
 
 	return t;
