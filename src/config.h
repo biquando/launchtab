@@ -19,6 +19,7 @@
 "\n"                                                                           \
 "Options\n"                                                                    \
 "  -d, --debug        show debug messages when installing\n"                   \
+"  -f  --force        allow installing an empty tab\n"                         \
 "  -q, --quiet        suppress output to stdout/stderr (doesn't affect\n"      \
 "                      output from -d)\n"                                      \
 ""

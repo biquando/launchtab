@@ -12,6 +12,7 @@
 #include "writer.h"
 
 int debug;
+int force;
 int quiet;
 static char *home;        /*  ~                               */
 static char *tabpath;     /*  ~/.config/launchtab/launch.tab  */
@@ -27,6 +28,14 @@ static void _install_file(char *path)
 	/* Check vaildity */
 	if (newtab.invalid) {
 		print_err("Aborting. Check %s\n", path);
+		exit(EINVAL);
+	}
+
+	/* Check if empty */
+	if (!force && newtab.nrules == 0 && newtab.ncronrules == 0) {
+		print_err(
+			"Tried to install an empty launchtab. Try `launchtab -r` to remove\n"
+			"your current tab, or use the `-f` option.\n");
 		exit(EINVAL);
 	}
 
@@ -239,6 +248,7 @@ int main(int argc, char *argv[])
 	argc = opts.argc;
 	argv = opts.argv;
 	debug = opts.debug;
+	force = opts.force;
 	quiet = opts.quiet;
 
 	switch (opts.op) {

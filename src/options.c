@@ -7,7 +7,7 @@
 #include "options.h"
 #include "util.h"
 
-#define OPTSTR "bcdehlqRr"
+#define OPTSTR "bcdefhlqRr"
 
 static void usage(int err)
 {
@@ -34,6 +34,7 @@ struct taboptions parseopts(int argc, char *argv[])
 		{ "cleanup", no_argument, NULL, 'c' },
 		{ "debug",   no_argument, NULL, 'd' },
 		{ "edit",    no_argument, NULL, 'e' },
+		{ "force",   no_argument, NULL, 'f' },
 		{ "help",    no_argument, NULL, 'h' },
 		{ "list",    no_argument, NULL, 'l' },
 		{ "quiet",   no_argument, NULL, 'q' },
@@ -55,6 +56,9 @@ struct taboptions parseopts(int argc, char *argv[])
 			break;
 		case 'e':
 			setop(&opts, EDTAB);
+			break;
+		case 'f':
+			opts.force = 1;
 			break;
 		case 'h':
 			usage(0);
